@@ -3,9 +3,9 @@
  * 導師碼與班級碼只以雜湊存在 GAS 的試算表，前端由導師在設定頁輸入。
  */
 window.APP_CONFIG = {
-  // 正式版 GAS 網頁應用程式網址（以 /exec 結尾）。正式版尚未部署，先留空。
+  // 正式版 GAS 網頁應用程式網址（部署「正式版 v1」，以 /exec 結尾）。
   // 測試版網址不要寫在這裡（repo 是公開的），改寫在不進 Git 的 config.local.js。
-  GAS_URL: '',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbxeTzCttgwmFu3SptbCW1hwC1zYF1OF_aFGzw8VGa1owBNNz-kBMcGpWNPkODNCF_ug/exec',
 
   // 抽籤頁背景音樂來源："youtube"（預設）、"mp3"（assets/lottery-bgm.mp3）、"none"（只用合成音效）
   MUSIC_SOURCE: 'youtube',

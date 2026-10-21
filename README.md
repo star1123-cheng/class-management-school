@@ -30,7 +30,7 @@
 
 - 底稿是複製當下舊專案資料夾裡的版本（包含舊專案當時還沒 commit 的修改）。
 - 已複製：`index.html`、`settings.html`、`lottery.html`、`board.html`、`css/`、`js/`、`icons/`、`manifest.webmanifest`、`sw.js`、`assets/.gitkeep`、`gas/Code.gs`、`gas/appsscript.json`、`.claude/launch.json`（本機預覽設定）。
-- `config.js`：重新建立，`GAS_URL` 只放正式版網址（尚未部署，先留空）；測試版網址放在不進 Git 的 `config.local.js`。
+- `config.js`：重新建立，`GAS_URL` 只放正式版網址（已填入「正式版 v1」）；測試版網址放在不進 Git 的 `config.local.js`。
 - `.gitignore`：以舊版為基礎，加強為「所有 csv／xlsx 都不進 repo」。
 - **刻意不複製**：`.clasp.json`、`.clasp-prod.json`、舊網址、名單 csv、`test-data/`、`.git`、部署 ID、`SPEC.md`、`導師操作清單.md`。
 
