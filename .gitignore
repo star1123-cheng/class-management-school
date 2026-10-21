@@ -1,0 +1,32 @@
+# 機敏檔案：一律不進 Git
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+*serviceAccountKey*.json
+.clasprc.json
+node_modules/
+dist/
+
+# clasp 本機設定（測試版與正式版的 scriptId 不同，只留在這台電腦）
+.clasp.json
+.clasp-*.json
+
+# 全校版：任何名單、成績匯出檔都不進 repo（範本若需要，改放在文件裡說明欄位）
+*.csv
+*.xlsx
+*名單*
+roster*
+
+# 背景音樂檔由導師自行放入，預設不上傳（是否可公開請先確認 NCS 使用政策）
+assets/*.mp3
+
+# Claude Code 個人設定
+.claude/settings.local.json
+
+# 系統檔
+.DS_Store
+Thumbs.db
+desktop.ini

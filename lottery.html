@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <meta name="theme-color" content="#1B1836">
+  <title>雲端一番賞</title>
+  <link rel="stylesheet" href="css/lottery.css?v=6">
+</head>
+<body class="lottery">
+  <canvas id="stars" class="stars" aria-hidden="true"></canvas>
+
+  <div class="app">
+    <header class="top">
+      <h1>✦ 雲端一番賞</h1>
+      <div class="controls">
+        <button id="btnSoundOn" class="btn btn-sound" type="button">🔊 開啟聲音</button>
+        <label class="tgl"><input type="checkbox" id="tglMusic" checked><span class="track"></span>音樂</label>
+        <label class="tgl"><input type="checkbox" id="tglSfx" checked><span class="track"></span>音效</label>
+        <label class="vol">音量<input type="range" id="volume" min="0" max="100" value="80" aria-label="音量"></label>
+        <label class="tgl"><input type="checkbox" id="tglShort"><span class="track"></span>縮短動畫</label>
+        <button id="btnFull" class="btn" type="button">全螢幕</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="numbers" aria-label="籤號">
+        <div id="numGrid" class="num-grid"></div>
+        <p id="poolStatus" class="pool-status"></p>
+      </section>
+
+      <section class="side">
+        <div class="panel seats-panel">
+          <div class="panel-head">
+            <h2>選擇座號</h2>
+            <button id="btnBag" class="btn btn-bag" type="button">🎒 卡片背包</button>
+          </div>
+          <div id="seatGrid" class="seat-grid"></div>
+        </div>
+        <div class="panel draw-panel">
+          <div id="selInfo" class="sel-info">請先選擇座號</div>
+          <button id="btnDraw" class="btn-draw" type="button" disabled>抽</button>
+        </div>
+        <div class="panel recent-panel">
+          <h2>最近抽中</h2>
+          <ol id="recent" class="recent"></ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="credit">
+        <div>Track: Julius Dreisig &amp; Zeus X Crona - Invisible [NCS Release]</div>
+        <div>Music provided by NoCopyrightSounds. <a href="https://ncs.io/Invisible" target="_blank" rel="noopener noreferrer">https://ncs.io/Invisible</a></div>
+      </div>
+      <div class="foot-status">
+        <span id="musicMsg" hidden>音樂載入失敗，改用內建音效</span>
+        <span id="netMsg" hidden>連線中斷</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 抽籤動畫覆蓋層 -->
+  <div id="overlay" class="overlay" hidden>
+    <div class="spot" aria-hidden="true"></div>
+    <div id="stageArea" class="stage-area" aria-live="polite"></div>
+    <div class="overlay-actions">
+      <button id="btnSkip" class="btn" type="button">跳過</button>
+      <button id="btnNext" class="btn btn-next" type="button" hidden>下一位</button>
+    </div>
+  </div>
+  <button id="btnSkipSpin" class="btn skip-float" type="button" hidden>跳過</button>
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+
+  <!-- 卡片背包 -->
+  <div id="bagOverlay" class="bag-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="bagTitle">
+    <div class="bag-box">
+      <header class="bag-head">
+        <h2 id="bagTitle">🎒 卡片背包</h2>
+        <button id="btnBagClose" class="btn" type="button">關閉</button>
+      </header>
+      <div id="bagSeats" class="bag-seats" aria-label="選擇座號"></div>
+      <div id="bagBody" class="bag-body" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- YouTube 播放器：移到畫面外（不使用 display:none） -->
+  <div class="yt-holder" aria-hidden="true"><div id="ytPlayer"></div></div>
+
+  <script src="config.js?v=6"></script>
+  <script src="js/api.js?v=6"></script>
+  <script src="js/audio.js?v=6"></script>
+  <script src="js/music.js?v=6"></script>
+  <script src="js/lottery-fx.js?v=6"></script>
+  <script src="js/backpack.js?v=6"></script>
+  <script src="js/lottery.js?v=6"></script>
+  <!-- 著作權浮水印：放左下（號碼格下方、NCS 音樂標示上方），避開右下「跳過」按鈕 -->
+  <script src="js/watermark.js?v=6" data-position="bottom-left" data-offset-x="calc(1.4 * var(--u))" data-offset-y="calc(3.6 * var(--u))" data-size="calc(.7 * var(--u))" data-opacity="0.75" defer></script>
+</body>
+</html>

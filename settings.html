@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#FFF8EE">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="班級管理">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="application-name" content="班級管理">
+  <title>系統設定</title>
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+  <div class="page wide">
+    <header class="topbar">
+      <h1 class="brand"><img src="icons/logo-96.png" alt="" width="32" height="32">系統設定</h1>
+      <div class="right">
+        <a class="icon-link" href="index.html">記錄頁</a>
+        <a class="icon-link" href="board.html">投影</a>
+        <a class="icon-link" href="lottery.html">抽籤</a>
+      </div>
+    </header>
+
+    <!-- 1. 存取碼 -->
+    <section class="card" id="secCode">
+      <h2>存取碼</h2>
+      <p class="muted">有兩組存取碼：「導師碼」可以使用全部功能，只輸入在導師自己的裝置；「教室碼」只能使用投影頁與抽籤頁，輸入在班級電腦。存取碼只會存在這台裝置的瀏覽器，不會寫在程式或網址裡。</p>
+      <label class="field">輸入存取碼
+        <input id="codeInput" class="input" type="password" autocomplete="current-password" placeholder="導師碼或教室碼">
+      </label>
+      <label class="gate-remember" style="margin-bottom:10px">
+        <input id="codeRemember" type="checkbox" checked>
+        記住在這台裝置（在班級電腦輸入導師碼時請取消勾選，關閉分頁後就會登出）
+      </label>
+      <div class="row">
+        <button id="btnSaveCode" class="btn btn-primary" type="button">儲存並測試連線</button>
+        <button id="btnTestCode" class="btn" type="button">測試目前存取碼</button>
+        <button id="btnClearCode" class="btn btn-danger" type="button">清除這台裝置的存取碼</button>
+      </div>
+      <p id="codeStatus" class="status-line"></p>
+    </section>
+
+    <!-- 2. 名單 -->
+    <section class="card" id="secRoster">
+      <h2>名單</h2>
+      <p>目前在籍：<span id="activeCount" class="big-number">–</span> 人</p>
+
+      <h3>匯入 CSV</h3>
+      <p class="muted">只會讀取「座號」（或 seat、no）與「班級代號」（或 class）兩欄，其他欄位（包含姓名）會在這台瀏覽器直接丟棄，不會上傳。
+        <a href="template-roster.csv" download>下載範本 template-roster.csv</a></p>
+      <input id="csvFile" class="input" type="file" accept=".csv,text/csv">
+      <div class="radio-row" role="radiogroup" aria-label="匯入模式">
+        <label><input type="radio" name="importMode" value="replace" checked> 取代整份名單</label>
+        <label><input type="radio" name="importMode" value="append"> 只新增缺少的座號</label>
+      </div>
+      <div id="previewBox" hidden>
+        <p id="previewSummary" class="preview-summary"></p>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>列號</th><th>班級代號</th><th>座號</th><th>檢查結果</th></tr></thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="btnImport" class="btn btn-primary" type="button" disabled>確認匯入</button>
+          <button id="btnCancelImport" class="btn" type="button">取消</button>
+        </div>
+      </div>
+
+      <h3>在籍狀態</h3>
+      <p class="muted">點座號可切換在籍／不在籍（轉學或缺號設為不在籍，資料不會刪除）。</p>
+      <div id="rosterGrid" class="mini-grid"></div>
+    </section>
+
+    <!-- 3. 發券 -->
+    <section class="card" id="secTickets">
+      <h2>發抽籤券</h2>
+      <div class="row">
+        <label class="field" style="flex:1;min-width:120px">座號
+          <select id="ticketSeat" class="input"></select>
+        </label>
+        <label class="field" style="flex:1;min-width:120px">原因
+          <select id="ticketReason" class="input">
+            <option value="發放">發放</option>
+            <option value="更正">更正</option>
+          </select>
+        </label>
+      </div>
+      <div class="row spread">
+        <div class="stepper" aria-label="張數">
+          <button id="btnMinus" class="btn btn-icon" type="button" aria-label="減少">−</button>
+          <output id="ticketAmount">1</output>
+          <button id="btnPlus" class="btn btn-icon" type="button" aria-label="增加">＋</button>
+          <span class="muted">張</span>
+        </div>
+        <button id="btnGrant" class="btn btn-primary" type="button">送出</button>
+      </div>
+      <p class="muted">「發放」只能是正數；「更正」可用負數扣券，餘額不會低於 0。</p>
+      <p id="ticketStatus" class="status-line"></p>
+      <h3>全班券餘額</h3>
+      <div id="balanceGrid" class="mini-grid"></div>
+    </section>
+
+    <!-- 4. 籤池 -->
+    <section class="card" id="secPool">
+      <h2>籤池</h2>
+      <p>已抽 <span id="poolDrawn" class="big-number">–</span> ／ <span id="poolTotal">40</span></p>
+      <label class="field">要重設籤池，請輸入「重設」兩個字
+        <input id="resetInput" class="input" type="text" autocomplete="off" placeholder="重設">
+      </label>
+      <button id="btnReset" class="btn btn-danger" type="button" disabled>重設籤池</button>
+      <p class="muted">重設只會讓 40 個號碼重新可抽；抽籤紀錄與券異動都會保留。</p>
+      <p id="poolStatus" class="status-line"></p>
+    </section>
+
+    <!-- 5. 卡片背包 -->
+    <section class="card" id="secBag">
+      <h2>卡片背包</h2>
+      <p class="muted">學生抽到的卡片會自動放進背包。「再抽一次」使用後自動送 1 張券；「幸運女神」使用時要選一張卡放進背包。學生可以在抽籤頁的背包把 3 張未使用的卡（卡名可以相同）回收換 1 張券，需要導師碼。按錯可以按「復原」。</p>
+      <label class="field">查看
+        <select id="bagSeat" class="input"><option value="">全班</option></select>
+      </label>
+
+      <h3>未使用（<span id="bagUnusedCount">0</span> 張）</h3>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>座號</th><th>卡片</th><th>取得</th><th>操作</th></tr></thead>
+          <tbody id="bagUnusedBody"></tbody>
+        </table>
+      </div>
+
+      <h3>已使用</h3>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>使用時間</th><th>座號</th><th>卡片</th><th>操作</th></tr></thead>
+          <tbody id="bagUsedBody"></tbody>
+        </table>
+      </div>
+      <p id="bagStatus" class="status-line"></p>
+
+      <h3>學期末清理</h3>
+      <p class="muted">刪除所有「已使用」與「已回收」的卡片紀錄，未使用的卡片會保留。學生畢業時，請到試算表直接刪除「卡片背包」工作表的資料列。</p>
+      <label class="field">要清除，請輸入「清除」兩個字
+        <input id="bagClearInput" class="input" type="text" autocomplete="off" placeholder="清除">
+      </label>
+      <button id="btnBagClear" class="btn btn-danger" type="button" disabled>清除已使用的卡片</button>
+    </section>
+
+    <!-- 6. 抽籤紀錄 -->
+    <section class="card" id="secDraws">
+      <h2>抽籤紀錄（最近 20 筆）</h2>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>時間</th><th>座號</th><th>號碼</th><th>類型</th><th>結果</th></tr></thead>
+          <tbody id="drawBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="config.js?v=6"></script>
+  <script src="js/api.js?v=6"></script>
+  <script src="js/pwa.js?v=6"></script>
+  <script src="js/settings.js?v=6"></script>
+  <!-- 著作權浮水印 -->
+  <script src="js/watermark.js?v=6" defer></script>
+</body>
+</html>

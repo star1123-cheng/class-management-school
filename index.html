@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#FFF8EE">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="班級管理">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="application-name" content="班級管理">
+  <title>作業缺交記錄</title>
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <h1 class="brand"><img src="icons/logo-96.png" alt="" width="32" height="32">作業缺交記錄</h1>
+      <div class="right">
+        <span id="missingCount" class="missing-count">缺交 0 人</span>
+        <a class="icon-link" href="settings.html" aria-label="設定頁">⚙ 設定</a>
+      </div>
+    </header>
+
+    <!-- 目前作業 -->
+    <section class="card current-card" id="currentCard">
+      <div class="date" id="curDate"></div>
+      <div class="name" id="curName">載入中…</div>
+      <label class="field">切換作業
+        <select id="assignSelect" class="input"></select>
+      </label>
+      <button id="btnShowNew" class="btn btn-block" type="button">＋ 新增作業</button>
+      <form id="newForm" class="stack" hidden style="margin-top:10px">
+        <label class="field">作業名稱（必填）
+          <input id="newName" class="input" type="text" maxlength="40" required placeholder="例如：數學習作 P.32">
+        </label>
+        <label class="field">日期
+          <input id="newDate" class="input" type="date" required>
+        </label>
+        <div class="row">
+          <button class="btn btn-primary" type="submit">建立</button>
+          <button id="btnCancelNew" class="btn" type="button">取消</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="makeup-banner">補交模式：點紅色座號會改成「已補交」</div>
+
+    <!-- 座號按鈕格 -->
+    <section class="card">
+      <p id="gridHint" class="grid-hint"></p>
+      <div id="seatGrid" class="seat-grid" aria-label="座號"></div>
+    </section>
+
+    <!-- 作業清單 -->
+    <details class="card" id="listCard" open>
+      <summary>作業清單與投影設定</summary>
+      <p class="muted">「上投影」最多 5 項；用 ↑ ↓ 調整投影順序。</p>
+      <ul id="assignList" class="assign-list"></ul>
+    </details>
+  </div>
+
+  <nav class="bottom-bar">
+    <div class="inner">
+      <button id="btnSave" class="btn btn-primary" type="button" disabled>儲存</button>
+      <button id="btnMakeup" class="btn" type="button" aria-pressed="false">補交模式</button>
+    </div>
+  </nav>
+
+  <script src="config.js?v=6"></script>
+  <script src="js/api.js?v=6"></script>
+  <script src="js/pwa.js?v=6"></script>
+  <script src="js/record.js?v=6"></script>
+  <!-- 著作權浮水印：往上移，避開底部「儲存／補交模式」按鈕列 -->
+  <script src="js/watermark.js?v=6" data-offset-y="calc(84px + env(safe-area-inset-bottom))" data-size="12px" defer></script>
+</body>
+</html>
