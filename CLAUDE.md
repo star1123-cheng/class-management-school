@@ -32,6 +32,8 @@
   - 測試版：`.clasp.json`，例如 `clasp --user cheng push`。
   - 正式版：`.clasp-prod.json`，例如 `clasp --user cheng -P .clasp-prod.json push`。
   - 兩個檔案都在 `.gitignore`，不可以進 Git。
+- **更新已部署的 Web App**：push 到測試版後，`/exec` 網址背後跑的還是舊版本。要到編輯器「部署 → 管理部署作業」，按鉛筆圖示編輯，把「版本」改成「新版本」，網址才會換成新程式。不要按「新增部署作業」，那會產生另一個新網址。
+  - 測試版網址（部署 `@1 測試版 v1` 起）：`https://script.google.com/macros/s/AKfycbw6XbVIcvwKcP7KLBim9Es1Tsz_TXFcr1py-AufQIIZ8fWi2a58_TMGLsRqE5Ye8cI4Aw/exec`
 - 用 curl 測 GAS 要用 `curl -sL -d '...'`，不要加 `-X POST`（轉址後會回 411）；送中文內容改用 Node。
 - 測試時只用錯誤的導師碼／管理密碼（預期回 `UNAUTHORIZED`），不要向導師索取真正的值。
 
