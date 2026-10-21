@@ -6,7 +6,7 @@
  */
 // 全校版專用名稱：和單班版在同一個網域（github.io），名稱不同才不會互相清掉快取
 var CACHE_PREFIX = 'class-mgmt-school-';
-var CACHE = CACHE_PREFIX + 'v8';
+var CACHE = CACHE_PREFIX + 'v9';
 var SHELL = [
   './',
   './index.html',

@@ -324,13 +324,13 @@ body.board-page {
   flex-wrap: wrap;
   align-content: center;
   align-items: center;
-  gap: calc(2 * var(--s)) calc(8 * var(--s));
+  gap: calc(12 * var(--s)) calc(8 * var(--s));
   padding: 0 calc(24 * var(--s));
   overflow: hidden;
 }
 .board-seats .chip {
-  height: calc(var(--f, 80) * var(--s));
-  min-width: calc(var(--f, 80) * 1.45 * var(--s));
+  height: calc(var(--f, 80) * 1.2 * var(--s));
+  min-width: calc(var(--f, 80) * 1.6 * var(--s));
   padding: 0 calc(var(--f, 80) * .16 * var(--s));
   border-radius: calc(var(--f, 80) * .2 * var(--s));
   background: var(--missing);

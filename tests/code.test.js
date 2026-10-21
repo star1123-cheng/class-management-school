@@ -304,7 +304,7 @@ test('效果「自選卡片」：只能挑同班、啟用、允許的效果；�
 });
 
 test('回收換券與清理：只動自己班', () => {
-  const { t1, t2 } = school();
+  const { g, t1, t2 } = school();
   onlyCard(t1, (c) => c.name === '導演');
   [1, 2, 3].forEach(() => drawCard(t1, 3));
   const cards = t1('getBackpack', { seat: 3 }).data.cards.filter((c) => c.status === '未使用').map((c) => c.id);
@@ -314,7 +314,10 @@ test('回收換券與清理：只動自己班', () => {
   const rc = t1('recycleCards', { cardIds: cards }).data;
   assert.equal(rc.balance, before + 1);
   assert.equal(t1('undoRecycle', { recycleId: rc.recycleId }).data.restored, 3);
-  t1('recycleCards', { cardIds: cards });
+  // 班級碼不能回收；別班拿到回收ID 也不能復原
+  assert.equal(api(g, C501, 'display')('recycleCards', { cardIds: cards }).error, 'FORBIDDEN');
+  const rc2 = t1('recycleCards', { cardIds: cards }).data;
+  assert.equal(t2('undoRecycle', { recycleId: rc2.recycleId }).error, 'NOT_FOUND');
   assert.equal(t2('clearUsedCards', { confirm: '清除' }).data.removed, 0);
   assert.equal(t1('clearUsedCards', { confirm: '清除' }).data.removed, 3);
 });

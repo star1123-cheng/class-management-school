@@ -8,10 +8,12 @@
 
   // 字級設定（以 1920×1080 的設計像素計）
   var NAME_MAX = 76, NAME_MIN = 56;
-  var BIG_MAX = 130, BIG_MIN = 80;     // 缺交 1 至 10 人
-  var SMALL_MAX = 96, SMALL_MIN = 64;  // 缺交 11 人以上
-  var GAP_X = 8, GAP_Y = 2, PAD_X = 24;
-  var CHIP_W = 1.45;                    // 卡片寬 = 字級 × 1.45
+  var BIG_MAX = 130;                   // 缺交 1 至 10 人的最大字級
+  var SMALL_MAX = 96;                  // 缺交 11 人以上的最大字級
+  var FONT_MIN = 40;                   // 人數很多時最小可縮到這裡，確保全部座號放得下
+  var GAP_X = 8, GAP_Y = 12, PAD_X = 24;
+  var CHIP_W = 1.6;                     // 卡片寬 = 字級 × 1.6（兩位數粗體實際約 1.54 倍，統一寬度才算得準）
+  var CHIP_H = 1.2;                     // 卡片高 = 字級 × 1.2，數字上下留白，兩行之間不會黏在一起
 
   var rows = [];
   var last = null;
@@ -71,13 +73,12 @@
       var W = rect.width / s - PAD_X * 2;
       var H = rect.height / s;
       var max = n <= 10 ? BIG_MAX : SMALL_MAX;
-      var min = n <= 10 ? BIG_MIN : SMALL_MIN;
-      var f = min;
-      for (var size = max; size >= min; size -= 2) {
+      var f = FONT_MIN;
+      for (var size = max; size >= FONT_MIN; size -= 2) {
         var cw = size * CHIP_W;
         var perLine = Math.max(1, Math.floor((W + GAP_X) / (cw + GAP_X)));
         var lines = Math.ceil(n / perLine);
-        if (lines * size + (lines - 1) * GAP_Y <= H) { f = size; break; }
+        if (lines * size * CHIP_H + (lines - 1) * GAP_Y <= H - 2) { f = size; break; }
       }
       r.seats.style.setProperty('--f', f);
     });

@@ -50,6 +50,8 @@
   function balanceOf(seat) { return data && data.balances ? (data.balances[seat] || 0) : 0; }
 
   /* ============ 畫面 ============ */
+  var RECENT_MAX = 10;   // 「最近抽中」最多顯示筆數（後端 getLottery 預設也回 10 筆）
+
   function renderAll() {
     renderNumbers();
     renderSeats();
@@ -117,7 +119,7 @@
   function renderRecent() {
     var ol = $('recent');
     App.clear(ol);
-    var list = (data.recent || []).slice(0, 5);
+    var list = (data.recent || []).slice(0, RECENT_MAX);
     if (!list.length) {
       ol.appendChild(h('li', { class: 'empty', text: '還沒有人抽籤' }));
       return;
@@ -128,6 +130,11 @@
         h('span', { class: 'r-no', text: 'No.' + r.number }),
         h('span', { class: 'r-name', text: r.name })));
     });
+    // 螢幕較矮時放不下 10 筆：從最舊的開始拿掉，不壓縮行距、不切到半行
+    var panel = ol.parentNode;
+    while (ol.childElementCount > 1 && panel.scrollHeight > panel.clientHeight + 1) {
+      ol.removeChild(ol.lastChild);
+    }
   }
 
   function renderDrawButton() {
@@ -422,6 +429,12 @@
   LotteryFx.initStars($('stars'), reducedMQ.matches);
   initControls();
   initBackpack();
+  // 視窗大小改變（例如按全螢幕）時，重新計算「最近抽中」放得下幾筆
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { if (data) renderRecent(); }, 150);
+  });
   App.requireCode().then(function (ok) {
     if (!ok) return;
     refresh();
