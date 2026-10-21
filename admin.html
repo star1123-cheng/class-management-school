@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#FFF8EE">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <title>管理者開班</title>
+  <link rel="stylesheet" href="css/style.css?v=7">
+</head>
+<body>
+  <div class="page wide">
+    <header class="topbar">
+      <h1 class="brand"><img src="icons/logo-96.png" alt="" width="32" height="32">管理者開班</h1>
+      <div class="right">
+        <a class="icon-link" href="settings.html">系統設定</a>
+      </div>
+    </header>
+
+    <!-- 1. 管理密碼 -->
+    <section class="card" id="secAdmin">
+      <h2>管理密碼</h2>
+      <p class="muted">管理密碼只放在這個分頁的記憶體裡，不會存進瀏覽器；重新整理或關閉分頁就會登出。10 分鐘內輸入錯誤 10 次會暫時鎖住。</p>
+      <form id="adminForm" class="row">
+        <input id="adminPassword" class="input" type="password" autocomplete="current-password" placeholder="管理密碼" aria-label="管理密碼" style="flex:1;min-width:180px">
+        <button id="btnAdminLogin" class="btn btn-primary" type="submit">登入</button>
+        <button id="btnAdminLogout" class="btn" type="button" hidden>登出</button>
+      </form>
+      <p id="adminStatus" class="status-line"></p>
+    </section>
+
+    <div id="adminArea" hidden>
+      <!-- 2. 班級列表 -->
+      <section class="card" id="secClasses">
+        <h2>班級列表</h2>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>班級代號</th><th>名稱</th><th>狀態</th><th>建立日期</th><th>操作</th></tr></thead>
+            <tbody id="classBody"></tbody>
+          </table>
+        </div>
+        <p id="classStatus" class="status-line"></p>
+        <div id="classPanel"></div>
+      </section>
+
+      <!-- 3. 開班 -->
+      <section class="card" id="secCreate">
+        <h2>開新班級</h2>
+        <p class="muted">開班時會自動建立 40 個號碼的籤池與預設卡片。代碼只會在這裡顯示一次，試算表裡只存雜湊，之後無法查回，請先抄給導師；忘記時只能重設。</p>
+        <form id="createForm">
+          <div class="row">
+            <label class="field" style="flex:1;min-width:140px">班級代號
+              <input id="newClassId" class="input" type="text" maxlength="10" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例如 501">
+            </label>
+            <label class="field" style="flex:2;min-width:180px">班級名稱
+              <input id="newClassName" class="input" type="text" maxlength="20" autocomplete="off" placeholder="例如 五年一班">
+            </label>
+          </div>
+          <div class="row">
+            <label class="field" style="flex:1;min-width:180px">導師碼（6 到 32 字，不可有空白）
+              <input id="newTeacherCode" class="input" type="text" maxlength="32" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="field" style="flex:1;min-width:180px">班級碼（投影、抽籤用）
+              <input id="newClassCode" class="input" type="text" maxlength="32" autocomplete="off" spellcheck="false">
+            </label>
+          </div>
+          <div class="row">
+            <button id="btnGenCodes" class="btn" type="button">產生隨機代碼</button>
+            <button id="btnCreate" class="btn btn-primary" type="submit">開班</button>
+          </div>
+        </form>
+        <p id="createStatus" class="status-line"></p>
+      </section>
+    </div>
+  </div>
+
+  <script src="config.js?v=7"></script>
+  <script src="js/api.js?v=7"></script>
+  <script src="js/admin.js?v=7"></script>
+  <!-- 著作權浮水印 -->
+  <script src="js/watermark.js?v=7" defer></script>
+</body>
+</html>

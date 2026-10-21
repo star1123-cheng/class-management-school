@@ -199,28 +199,27 @@
   }
 
   /* ---------- 收藏卡牌 ---------- */
-  // 每張卡的圖示與色相；試算表新增的卡片沒有對照時，用卡名算出固定色相、圖示用 ✦
-  var CARD_ART = {
-    '我是DJ': ['🎧', 285], '導演': ['🎬', 355], '神隊友': ['🤝', 205], '財神爺': ['💰', 42],
-    '免當值日生': ['😎', 160], '聯絡簿代抄': ['📒', 25], '免死金牌': ['🏅', 50], '老師來幫忙': ['🧑‍🏫', 180],
-    '掃地Pass': ['🧹', 95], '幸運女神': ['🍀', 325], '作業-1': ['📝', 220], '點數卡': ['💎', 265],
-    '再抽一次': ['🔄', 190], '野餐卡': ['🧺', 120], '白日夢卡': ['☁️', 240], '榮譽之星': ['🌟', 35]
+  // 圖示看卡片的「圖示」代號（老師在卡片管理挑選）；色相依圖示決定，同一種圖示顏色一致
+  var ICON_HUE = {
+    headphones: 285, clapper: 355, handshake: 205, moneybag: 42, cool: 160, notebook: 25,
+    medal: 50, teacher: 180, broom: 95, clover: 325, memo: 220, gem: 265,
+    redo: 190, picnic: 120, cloud: 240, glow: 35
   };
-  function cardArt(name) {
-    var a = CARD_ART[name];
-    if (a) return { icon: a[0], hue: a[1] };
+  function cardArt(card) {
+    var key = card.icon || '';
+    if (ICON_HUE.hasOwnProperty(key)) return { icon: App.iconOf(key), hue: ICON_HUE[key] };
     var hash = 0;
-    for (var i = 0; i < (name || '').length; i++) hash = (hash * 31 + name.charCodeAt(i)) % 360;
-    return { icon: '✦', hue: hash };
+    for (var i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) % 360;
+    return { icon: App.iconOf(key), hue: hash };
   }
 
   /**
    * 直式收藏卡牌（揭曉與背包共用）
-   * card：{ name, description }；opts.topLeft／opts.topRight：上方小字；opts.tag：外層標籤（預設 div）
+   * card：{ name, description, icon }；opts.topLeft／opts.topRight：上方小字；opts.tag：外層標籤（預設 div）
    */
   function cardEl(card, opts) {
     opts = opts || {};
-    var art = cardArt(card.name);
+    var art = cardArt(card);
     var props = Object.assign({}, opts.props || {});
     props.class = 'tcard' + (props.class ? ' ' + props.class : '');
     props.style = '--h:' + art.hue + (props.style ? ';' + props.style : '');

@@ -2,7 +2,8 @@
  * 抽籤頁：卡片背包
  * 打開背包 → 選座號 → 看卡片 → 點卡片放大 → 「使用這張卡」（需要導師碼）。
  * 再抽一次：使用後自動送 1 張抽籤券。
- * 幸運女神：使用前先從其他卡片挑一張，挑到的卡放進同一位同學的背包。
+ * 自選卡片：使用前先從可以挑的卡片中選一張，挑到的卡放進同一位同學的背包。
+ * 自動效果一律看卡片的「效果」欄位，不看卡名（老師可以自訂卡名）。
  * 回收換券：勾選 3 張未使用的卡（卡名可以相同）→ 換 1 張抽籤券（需要導師碼）。
  * 「復原」只在設定頁提供（導師專用）。
  */
@@ -11,8 +12,7 @@
   var h = App.h;
   var $ = function (id) { return document.getElementById(id); };
 
-  var CARD_REDRAW = '再抽一次';
-  var CARD_LUCKY = '幸運女神';
+  var EFFECT = App.EFFECT;
   var RECYCLED = '已回收';
   var RECYCLE_COUNT = 3;  // 和後端 RECYCLE_COUNT 一致
 
@@ -104,7 +104,7 @@
     var meta = opts.meta !== undefined ? opts.meta
       : used ? App.fmtMD(card.usedAt) + (recycled ? ' 回收' : ' 使用')
       : card.gotAt ? App.fmtMD(card.gotAt) + ' 取得' : '';
-    var from = !used && card.source === CARD_LUCKY ? '🍀 幸運女神' : '';
+    var from = !used && card.source === EFFECT.CHOOSE ? '🍀 自選' : '';
     return LotteryFx.cardEl(card, {
       tag: opts.onclick ? 'button' : 'div',
       topLeft: meta,
@@ -152,8 +152,8 @@
     var used = card.status !== '未使用';
     var hint = card.status === RECYCLED ? '這張卡在 ' + App.fmtMD(card.usedAt) + ' ' + App.fmtHM(card.usedAt) + ' 回收換券了。'
       : used ? '這張卡在 ' + App.fmtMD(card.usedAt) + ' ' + App.fmtHM(card.usedAt) + ' 使用過了。'
-      : card.name === CARD_REDRAW ? '使用後會自動送 ' + card.seat + ' 號 1 張抽籤券。'
-      : card.name === CARD_LUCKY ? '使用時可以從其他卡片中挑一張，放進 ' + card.seat + ' 號的背包。'
+      : card.effect === EFFECT.REDRAW ? '使用後會自動送 ' + card.seat + ' 號 1 張抽籤券。'
+      : card.effect === EFFECT.CHOOSE ? '使用時可以從其他卡片中挑一張，放進 ' + card.seat + ' 號的背包。'
       : '使用後請老師現場執行卡片內容。';
     body.appendChild(h('div', { class: 'bag-detail' },
       ticket(card, { big: true }),
@@ -161,21 +161,21 @@
       h('div', { class: 'bag-actions' },
         h('button', { type: 'button', class: 'btn', text: '← 回到背包', onclick: renderList }),
         used ? null : h('button', {
-          type: 'button', class: 'btn btn-use', text: card.name === CARD_LUCKY ? '使用：挑一張卡' : '使用這張卡',
-          onclick: function () { card.name === CARD_LUCKY ? renderLucky(card) : useCard(card, null, this); }
+          type: 'button', class: 'btn btn-use', text: card.effect === EFFECT.CHOOSE ? '使用：挑一張卡' : '使用這張卡',
+          onclick: function () { card.effect === EFFECT.CHOOSE ? renderLucky(card) : useCard(card, null, this); }
         }))));
   }
 
-  /** 幸運女神：列出可以挑的卡片 */
+  /** 自選卡片：列出可以挑的卡片（後端只回傳允許挑的效果） */
   function renderLucky(card) {
     var body = $('bagBody');
     App.clear(body);
     var picked = null;
     var confirmBtn = h('button', { type: 'button', class: 'btn btn-use', text: '確定選這張', disabled: true,
-      onclick: function () { if (picked) useCard(card, picked.name, this); } });
+      onclick: function () { if (picked) useCard(card, picked, this); } });
     var grid = h('div', { class: 'bag-grid lucky' });
     st.choices.forEach(function (c) {
-      var el = ticket({ name: c.name, description: c.description, status: '未使用' }, {
+      var el = ticket({ name: c.name, description: c.description, icon: c.icon, status: '未使用' }, {
         meta: '',
         onclick: function () {
           picked = c;
@@ -189,7 +189,7 @@
       el.setAttribute('aria-pressed', 'false');
       grid.appendChild(el);
     });
-    body.appendChild(h('p', { class: 'bag-summary' }, '🍀 幸運女神：請 ', h('strong', { text: card.seat + ' 號' }), ' 挑一張卡'));
+    body.appendChild(h('p', { class: 'bag-summary' }, '🍀 自選卡片：請 ', h('strong', { text: card.seat + ' 號' }), ' 挑一張卡'));
     body.appendChild(grid);
     body.appendChild(h('div', { class: 'bag-actions sticky' },
       h('button', { type: 'button', class: 'btn', text: '← 返回', onclick: function () { renderDetail(card); } }),
@@ -202,9 +202,9 @@
     st.busy = true;
     if (btn) { btn.disabled = true; btn.textContent = '處理中…'; }
     try {
-      var d = await App.teacherApi('useCard', { cardId: card.id, choice: choice || undefined });
+      var d = await App.teacherApi('useCard', { cardId: card.id, choiceId: choice ? choice.id : undefined });
       st.busy = false;
-      // 先在本機更新卡片數：用掉 1 張；幸運女神會多 1 張挑到的卡
+      // 先在本機更新卡片數：用掉 1 張；自選卡片會多 1 張挑到的卡
       st.counts[card.seat] = Math.max(0, (st.counts[card.seat] || 0) - 1 + (d.chosen ? 1 : 0));
       renderSeats();
       renderDone(d);
@@ -212,12 +212,12 @@
     } catch (e) {
       st.busy = false;
       if (e.code === 'CANCELLED') {
-        if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice + '」' : '使用這張卡'; }
+        if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice.name + '」' : '使用這張卡'; }
         return;
       }
       App.toast(App.errorText(e), 'error');
       if (e.code === 'ALREADY_USED' || e.code === 'NOT_FOUND') { load(); return; }
-      if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice + '」' : '使用這張卡'; }
+      if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice.name + '」' : '使用這張卡'; }
     }
   }
 

@@ -7,7 +7,7 @@
   'use strict';
   var h = App.h;
   var $ = function (id) { return document.getElementById(id); };
-  var LAST_KEY = 'hwt_last_assignment';
+  var LAST_KEY = 'cms_last_assignment';
   var MAX_BOARD = 5;
 
   var state = {

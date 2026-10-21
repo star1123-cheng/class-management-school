@@ -33,7 +33,8 @@
   - 正式版：`.clasp-prod.json`，例如 `clasp --user cheng -P .clasp-prod.json push`。
   - 兩個檔案都在 `.gitignore`，不可以進 Git。
 - **更新已部署的 Web App**：push 到測試版後，`/exec` 網址背後跑的還是舊版本。要到編輯器「部署 → 管理部署作業」，按鉛筆圖示編輯，把「版本」改成「新版本」，網址才會換成新程式。不要按「新增部署作業」，那會產生另一個新網址。
-  - 測試版網址（部署 `@1 測試版 v1` 起）：`https://script.google.com/macros/s/AKfycbw6XbVIcvwKcP7KLBim9Es1Tsz_TXFcr1py-AufQIIZ8fWi2a58_TMGLsRqE5Ye8cI4Aw/exec`
+- **測試版網址不寫進任何會進 Git 的檔案**（repo 是公開的，包含 `CLAUDE.md`、`config.js`、`README.md`），只記在不進 Git 的 `config.local.js`（只在 localhost 預覽時載入）。換新網址時，導師會告訴我，我再更新 `config.local.js`。
+  - 舊網址不用改寫 Git 歷史：到「管理部署作業」把舊部署**封存**，網址就失效了。
 - 用 curl 測 GAS 要用 `curl -sL -d '...'`，不要加 `-X POST`（轉址後會回 411）；送中文內容改用 Node。
 - 測試時只用錯誤的導師碼／管理密碼（預期回 `UNAUTHORIZED`），不要向導師索取真正的值。
 
@@ -64,7 +65,8 @@
 
 ## 前端快取版本號
 
-改了任何 CSS、JS（含 `config.js`），HTML 裡的 `?v=N` 和 `sw.js` 的 `class-mgmt-vN` 要一起加大。
+改了任何 CSS、JS（含 `config.js`），HTML 裡的 `?v=N` 和 `sw.js` 的 `class-mgmt-school-vN` 要一起加大。
+快取名稱必須以 `class-mgmt-school-` 開頭、瀏覽器儲存鍵名以 `cms_` 開頭：單班版和全校版同在 `star1123-cheng.github.io` 網域，名稱相同會互相清掉快取、讀到對方的存取碼。
 
 ## 文件要跟著改
 

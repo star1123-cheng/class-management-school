@@ -14,6 +14,9 @@ dist/
 .clasp.json
 .clasp-*.json
 
+# 本機測試設定（測試版 GAS 網址，repo 公開所以不進 Git）
+config.local.js
+
 # 全校版：任何名單、成績匯出檔都不進 repo（範本若需要，改放在文件裡說明欄位）
 *.csv
 *.xlsx

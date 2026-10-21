@@ -10,8 +10,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var cfg = window.APP_CONFIG || {};
 
-  var PENDING_KEY = 'hwt_pending_draw';
-  var PREF_KEY = 'hwt_lottery_prefs';
+  var PENDING_KEY = 'cms_pending_draw';
+  var PREF_KEY = 'cms_lottery_prefs';
   var POLL_MS = 10000;
   var reducedMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 
@@ -160,7 +160,7 @@
     if (phase !== 'idle' || !data || selected === null || balanceOf(selected) < 1 || data.remainingCount === 0) return;
     var requestId = App.newId();
     // 先記下 requestId：若動畫途中重新整理，可用同一個編號查回結果，不會重複扣券
-    App.store.setJSON(PENDING_KEY, { requestId: requestId, seat: selected, at: Date.now() });
+    App.store.setJSON(PENDING_KEY, { classId: App.getClassId(), requestId: requestId, seat: selected, at: Date.now() });
     runDraw(requestId, selected);
   }
 
@@ -324,6 +324,8 @@
   function checkResume() {
     var p = App.store.getJSON(PENDING_KEY, null);
     if (!p || typeof p.requestId !== 'string' || typeof p.seat !== 'number') return;
+    // 換了班級登入時，上一班的未完成抽籤不能用這一班查詢
+    if (p.classId !== App.getClassId()) { App.store.remove(PENDING_KEY); return; }
     phase = 'error';
     renderDrawButton();
     messageBox('上次的抽籤還沒顯示結果', p.seat + ' 號的抽籤在動畫途中被中斷了。按「顯示結果」會用同一筆抽籤編號查詢，不會重複扣券。', [

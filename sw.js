@@ -4,7 +4,9 @@
  * 沒網路時才用手機上的備份顯示畫面。
  * 只處理本站的 GET 請求；GAS API（POST、script.google.com）與 YouTube 一律不經過快取，資料永遠是即時的。
  */
-var CACHE = 'class-mgmt-v6';
+// 全校版專用名稱：和單班版在同一個網域（github.io），名稱不同才不會互相清掉快取
+var CACHE_PREFIX = 'class-mgmt-school-';
+var CACHE = CACHE_PREFIX + 'v7';
 var SHELL = [
   './',
   './index.html',
@@ -29,10 +31,10 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('activate', function (event) {
-  // 清掉舊版快取
+  // 只清掉全校版自己的舊版快取，不動同網域其他網站的快取
   event.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+      return Promise.all(keys.filter(function (k) { return k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
 });
