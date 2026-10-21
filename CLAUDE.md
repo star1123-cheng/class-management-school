@@ -25,12 +25,12 @@
 
 ## clasp（3.4.1）與兩個帳號
 
-- 新帳號用 `clasp login --user school` 登入。**本專案的每一個 clasp 指令都要加 `--user school`**，否則會用到 `default`（舊專案的帳號）。
+- 新帳號用 `clasp login --user cheng` 登入。**本專案的每一個 clasp 指令都要加 `--user cheng`**，否則會用到 `default`（舊專案的帳號）。
 - `default` 帳號留給舊專案使用，本專案不要用。
 - 新的 GAS 專案**不分享**給原本的帳號。
 - 測試版與正式版分開部署：
-  - 測試版：`.clasp.json`，例如 `clasp --user school push`。
-  - 正式版：`.clasp-prod.json`，例如 `clasp --user school -P .clasp-prod.json push`。
+  - 測試版：`.clasp.json`，例如 `clasp --user cheng push`。
+  - 正式版：`.clasp-prod.json`，例如 `clasp --user cheng -P .clasp-prod.json push`。
   - 兩個檔案都在 `.gitignore`，不可以進 Git。
 - 用 curl 測 GAS 要用 `curl -sL -d '...'`，不要加 `-X POST`（轉址後會回 411）；送中文內容改用 Node。
 - 測試時只用錯誤的導師碼／管理密碼（預期回 `UNAUTHORIZED`），不要向導師索取真正的值。
@@ -53,6 +53,12 @@
 
 - 老師自訂的獎項名稱、說明等文字一律用 `textContent` 顯示，不可以放進 `innerHTML`。
 - 後端寫入前驗證欄位型態與長度（名稱、說明、機率範圍、效果只能是三個值之一）。
+
+## 後端自動測試
+
+- 改 `gas/Code.gs` 後先跑 `node --test tests/code.test.js`，全部通過才上傳到測試版。
+- 新增或修改 API 時，在 `tests/code.test.js` 補上對應的測試，特別是「別班拿不到、改不到」的隔離測試。
+- 每個讀寫班級資料的地方都要用 `table_(工作表, req.cid)`，不可以省略 `cid`（只有「班級」表與管理者刪除班級例外）。
 
 ## 前端快取版本號
 
