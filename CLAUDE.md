@@ -35,6 +35,10 @@
 - **更新已部署的 Web App**：push 到測試版後，`/exec` 網址背後跑的還是舊版本。要到編輯器「部署 → 管理部署作業」，按鉛筆圖示編輯，把「版本」改成「新版本」，網址才會換成新程式。不要按「新增部署作業」，那會產生另一個新網址。
 - **測試版網址不寫進任何會進 Git 的檔案**（repo 是公開的，包含 `CLAUDE.md`、`config.js`、`README.md`），只記在不進 Git 的 `config.local.js`（只在 localhost 預覽時載入）。換新網址時，導師會告訴我，我再更新 `config.local.js`。
   - 舊網址不用改寫 Git 歷史：到「管理部署作業」把舊部署**封存**，網址就失效了。
+- **測試版平時是關閉的**（存取權「只有我自己」，外人打網址只會到 Google 登入頁）。導師說要測試時才打開，測完再關。部署 ID 從 `config.local.js` 的網址取得（`/s/` 和 `/exec` 中間那段），不要寫進會進 Git 的檔案。
+  - 做法：在暫存資料夾複製 `.clasp.json`（`rootDir` 改 `.`）、`gas/Code.gs`、`gas/appsscript.json`，只改暫存那份 manifest 的 `webapp.access`（打開用 `ANYONE_ANONYMOUS`、關閉用 `MYSELF`），然後 `clasp --user cheng push --force`、`clasp --user cheng update-deployment <部署ID> -d "測試版 v2（開放中／關閉中）"`。**不可以改專案裡的 `gas/appsscript.json`**（正式版也用它）。
+  - 打開後用錯誤代碼 curl 確認回 `UNAUTHORIZED`；關閉後確認 GET 會轉到 Google 登入頁、POST 回 401。
+  - 測試版關閉時，本機預覽連不到後端是正常的。
 - 用 curl 測 GAS 要用 `curl -sL -d '...'`，不要加 `-X POST`（轉址後會回 411）；送中文內容改用 Node。
 - 測試時只用錯誤的導師碼／管理密碼（預期回 `UNAUTHORIZED`），不要向導師索取真正的值。
 
