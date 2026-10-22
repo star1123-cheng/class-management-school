@@ -17,7 +17,7 @@ window.APP_CONFIG = {
   // action 留空時，說明頁會顯示「聯絡表單尚未開放」
   CONTACT_FORM: {
     action: 'https://docs.google.com/forms/d/e/1FAIpQLSdlXOw_sNFMfWlUznPfOImo5AphQ8Qr7hz6fvuIws75ISKiLA/formResponse',
-    fields: { '學校': 'entry.604453079', '姓名': 'entry.734778448', '聯絡方式': 'entry.1563343983', '詢問類型': 'entry.1471969557' }
+    fields: { '學校': 'entry.604453079', '姓名': 'entry.734778448', '聯絡方式': 'entry.1563343983', '詢問類型': 'entry.1471969557', '想詢問的內容': 'entry.1300938876' }
   }
 };
 

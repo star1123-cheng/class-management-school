@@ -18,6 +18,43 @@ var TEXT_FIELDS = [
   ['聯絡方式', '建議填學校公務 Email 或學校電話＋分機', 80]
 ];
 
+// 「想詢問的內容」：選「申請開班」時網頁不顯示這一題，所以表單設為選填，只檢查長度
+var MESSAGE_TITLE = '想詢問的內容';
+var MESSAGE_MAX = 500;
+
+// 只在執行 addMessageField 時使用：在編輯器裡貼上表單的編輯網址，不要存進 Git
+var FORM_EDIT_URL = '';
+
+function addMessageItem_(form) {
+  var validation = FormApp.createParagraphTextValidation()
+    .setHelpText('最多 ' + MESSAGE_MAX + ' 個字')
+    .requireTextLengthLessThanOrEqualTo(MESSAGE_MAX)
+    .build();
+  return form.addParagraphTextItem()
+    .setTitle(MESSAGE_TITLE)
+    .setHelpText('選「使用問題」「建議回饋」「其他」時請填寫')
+    .setRequired(false)
+    .setValidation(validation);
+}
+
+/**
+ * 在「已經建立好」的聯絡表單加上「想詢問的內容」（只需要執行一次，重複執行不會加第二題）。
+ * 先把上面的 FORM_EDIT_URL 填成表單編輯網址，再執行。
+ */
+function addMessageField() {
+  if (!FORM_EDIT_URL) throw new Error('請先在 FORM_EDIT_URL 貼上表單的編輯網址');
+  var form = FormApp.openByUrl(FORM_EDIT_URL);
+  var found = form.getItems(FormApp.ItemType.PARAGRAPH_TEXT).filter(function (it) {
+    return it.getTitle() === MESSAGE_TITLE;
+  });
+  var item = found.length ? found[0].asParagraphTextItem() : addMessageItem_(form);
+
+  var url = form.createResponse().withItemResponse(item.createResponse('1')).toPrefilledUrl();
+  var id = (url.match(/entry\.\d+/) || ['找不到'])[0];
+  console.log((found.length ? '這一題已經存在，' : '已新增這一題，') + '請把下面這行複製給 Claude：');
+  console.log(MESSAGE_TITLE + '：' + id);
+}
+
 function createContactForm() {
   var form = FormApp.create(FORM_TITLE);
   form.setDescription(
@@ -49,6 +86,7 @@ function createContactForm() {
     .setChoiceValues(TOPICS)
     .setRequired(true);
   items.push({ name: '詢問類型', item: topic, sample: TOPICS[0] });
+  items.push({ name: MESSAGE_TITLE, item: addMessageItem_(form), sample: '1' });
 
   // 新版 Google 表單需要「發布」後才能收回覆；舊版沒有這個方法就略過
   if (typeof form.setPublished === 'function') form.setPublished(true);

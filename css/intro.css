@@ -179,6 +179,13 @@ img { display: inline-block; }
   border: 1.5px solid var(--border); border-radius: 12px; background: #FFFCF7;
   font: inherit; color: var(--text);
 }
+.cf-field textarea {
+  width: 100%; min-height: 130px; padding: 12px 14px; resize: vertical;
+  border: 1.5px solid var(--border); border-radius: 12px; background: #FFFCF7;
+  font: inherit; color: var(--text); line-height: 1.6;
+}
+.cf-count { display: block; margin-top: 4px; text-align: right; color: var(--text-2); font-size: 13px; }
+.cf-field textarea:focus,
 .cf-field input:focus, .cf-field select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px #FFE3C2; }
 .cf-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .cf-privacy { margin: 4px 0 16px; padding: 10px 14px; border-radius: 12px; background: #FFF1DE; color: var(--text-2); font-size: 14px; }

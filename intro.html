@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <title>班級管理全校版｜系統介紹</title>
-  <link rel="stylesheet" href="css/intro.css?v=10">
+  <link rel="stylesheet" href="css/intro.css?v=11">
 </head>
 <body>
   <!-- 頂端導覽 -->
@@ -436,6 +436,11 @@
               <option>其他</option>
             </select>
           </label>
+          <label class="cf-field" id="cfMessage" hidden>
+            <span>想詢問的內容 <em>必填</em></span>
+            <textarea name="想詢問的內容" rows="5" maxlength="500" placeholder="請描述您遇到的問題或建議，例如：在哪一頁、做了什麼操作、出現什麼畫面"></textarea>
+            <small class="cf-count">0 / 500</small>
+          </label>
           <!-- 防機器人：真人看不到這一欄，有填就不送出 -->
           <label class="cf-trap" aria-hidden="true">網站<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
 
@@ -469,8 +474,8 @@
     </div>
   </footer>
 
-  <script src="config.js?v=10"></script>
-  <script src="js/intro.js?v=10"></script>
-  <script src="js/contact.js?v=10"></script>
+  <script src="config.js?v=11"></script>
+  <script src="js/intro.js?v=11"></script>
+  <script src="js/contact.js?v=11"></script>
 </body>
 </html>

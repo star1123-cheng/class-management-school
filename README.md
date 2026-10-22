@@ -104,10 +104,11 @@ node --test tests/code.test.js
 ## 五之一、前端使用說明
 
 - **系統介紹頁**（`intro.html`）：給老師看的說明網頁，分區介紹功能、使用流程、身分與權限、資安與個資、常見問題，並連到各頁。最上方的介紹影片是網頁動畫（`js/intro.js`＋`css/intro.css`），沒有影片檔，畫面只用假座號；要改字幕或時間，改 `js/intro.js` 開頭的 `SCENES`。不連到 `admin.html`。
-- **聯絡窗口**（說明頁最下方，`js/contact.js`）：欄位有學校、姓名、聯絡方式、詢問類型，送到一份 Google 表單（與 `gas/Code.gs` 無關）。
+- **聯絡窗口**（說明頁最下方，`js/contact.js`）：欄位有學校、姓名、聯絡方式、詢問類型；選「使用問題」「建議回饋」「其他」時會多出必填的「想詢問的內容」（最多 500 字，選「申請開班」時不顯示，所以 Google 表單那一題是選填）。資料送到一份 Google 表單（與 `gas/Code.gs` 無關）。
   1. 用**新帳號**登入瀏覽器，到 https://script.google.com 開「新專案」，貼上 `tools/contact-form/建立聯絡表單.gs`；在「專案設定」勾選「在編輯器中顯示 appsscript.json」，換成 `tools/contact-form/appsscript.json` 的內容（只要求 Google 表單權限）。
   2. 執行 `createContactForm` 一次，把「執行記錄」印出的 JSON 填進 `config.js` 的 `CONTACT_FORM`（都是公開資訊）。
   3. 到表單「回覆」分頁連結試算表、開啟新回覆的 Email 通知。
+  - 已經用舊版程式建立過表單的話：在 `FORM_EDIT_URL` 貼上表單編輯網址（只在編輯器裡填，不要存進 Git），執行 `addMessageField` 補上「想詢問的內容」，再把印出的欄位編號填進 `config.js`。
   - `CONTACT_FORM.action` 留空時，說明頁顯示「聯絡表單尚未開放」。
   - 聯絡資料屬於老師的個人資料：只做回覆與開班聯繫，處理完畢後於學期末刪除。
 - **卡片管理**（設定頁）：老師可以新增、編輯、停用、刪除卡片。圖示只能從清單挑選；效果有「無」「再抽一次」「自選卡片」三種，系統的自動效果一律看效果欄位，不看卡名。
