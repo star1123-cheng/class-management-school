@@ -11,7 +11,14 @@ window.APP_CONFIG = {
   MUSIC_SOURCE: 'youtube',
 
   // NCS〈Invisible〉Julius Dreisig & Zeus X Crona
-  YOUTUBE_VIDEO_ID: 'QglaLzo_aPk'
+  YOUTUBE_VIDEO_ID: 'QglaLzo_aPk',
+
+  // 說明頁「聯絡我們」送出的 Google 表單（用 tools/contact-form 建立後填入，都是公開資訊）
+  // action 留空時，說明頁會顯示「聯絡表單尚未開放」
+  CONTACT_FORM: {
+    action: 'https://docs.google.com/forms/d/e/1FAIpQLSdlXOw_sNFMfWlUznPfOImo5AphQ8Qr7hz6fvuIws75ISKiLA/formResponse',
+    fields: { '學校': 'entry.604453079', '姓名': 'entry.734778448', '聯絡方式': 'entry.1563343983', '詢問類型': 'entry.1471969557' }
+  }
 };
 
 // 只在本機預覽（localhost）時載入 config.local.js，用測試版網址覆蓋 GAS_URL。

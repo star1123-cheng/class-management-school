@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FFF8EE">
+  <meta name="description" content="班級管理全校版：作業缺交記錄、投影看板、抽籤獎勵與卡片背包，全校導師共用的免安裝網頁。">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>班級管理全校版｜系統介紹</title>
+  <link rel="stylesheet" href="css/intro.css?v=10">
+</head>
+<body>
+  <!-- 頂端導覽 -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#top"><img src="icons/logo-96.png" alt="" width="30" height="30">班級管理 全校版</a>
+      <nav class="nav-links" aria-label="頁內導覽">
+        <a href="#video">介紹影片</a>
+        <a href="#features">功能</a>
+        <a href="#flow">使用流程</a>
+        <a href="#roles">身分與權限</a>
+        <a href="#safety">資安與個資</a>
+        <a href="#faq">常見問題</a>
+        <a href="#contact">聯絡窗口</a>
+      </nav>
+      <a class="btn btn-primary btn-sm" href="index.html">開始使用</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- 開場＋介紹影片 -->
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">全校導師共用・免安裝・手機電腦都能用</p>
+        <h1>讓每天的班級經營，<span class="hl">輕鬆一點</span></h1>
+        <p class="lead">點座號記下作業缺交、教室電腦投影看板、用抽籤券和卡片獎勵學生。<br class="br-wide">每個班級各自獨立，學生只用「班級＋座號」，不存真實姓名。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#video">▶ 看 1 分鐘介紹</a>
+          <a class="btn" href="#features">看功能說明</a>
+        </div>
+
+        <!-- 動畫介紹影片（純網頁動畫，沒有影片檔） -->
+        <div id="video" class="vp" tabindex="0" aria-label="介紹影片播放器，按空白鍵播放或暫停">
+          <div class="vp-screen">
+            <div class="stage" aria-hidden="true">
+
+              <!-- 片頭 -->
+              <div class="scene sc-title" data-scene="0">
+                <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
+                <img class="t-logo" src="icons/icon-192.png" alt="" width="132" height="132">
+                <div class="t-name">班級管理<span>全校版</span></div>
+                <div class="t-chips">
+                  <span style="--d:1.6s">📝 記錄缺交</span>
+                  <span style="--d:1.9s">📺 投影看板</span>
+                  <span style="--d:2.2s">🎟️ 抽籤獎勵</span>
+                  <span style="--d:2.5s">🎒 卡片背包</span>
+                </div>
+              </div>
+
+              <!-- 01 記錄缺交 -->
+              <div class="scene sc-record" data-scene="1">
+                <div class="side">
+                  <div class="num">01</div>
+                  <h2>記錄缺交</h2>
+                  <p>點一下座號就記下缺交，<br>紅色一眼就看出來。</p>
+                  <ul>
+                    <li style="--d:4.6s">補交模式：再點一次改成已補交</li>
+                    <li style="--d:5.2s">一天多項作業，隨時切換</li>
+                  </ul>
+                </div>
+                <div class="phone">
+                  <div class="ph-top">
+                    <b>作業缺交記錄</b>
+                    <span class="cnt">
+                      <span>缺交 0 人</span>
+                      <span style="--d:1.6s">缺交 1 人</span>
+                      <span style="--d:2.6s">缺交 2 人</span>
+                      <span style="--d:3.6s">缺交 3 人</span>
+                    </span>
+                  </div>
+                  <div class="ph-card"><small>10/22（四）</small><b>數學習作 P.32</b></div>
+                  <div class="ph-grid" id="seatGrid"></div>
+                  <div class="ph-save">儲存</div>
+                  <div class="ph-toast">✓ 已儲存</div>
+                </div>
+              </div>
+
+              <!-- 02 投影看板 -->
+              <div class="scene sc-board" data-scene="2">
+                <div class="monitor">
+                  <div class="screen">
+                    <div class="bd-head">10/22（四）作業缺交</div>
+                    <div class="bd-row" style="--d:.5s">
+                      <span class="bd-name">數學習作 P.32</span>
+                      <span class="chip" style="--d:1.0s">5</span><span class="chip" style="--d:1.15s">12</span><span class="chip" style="--d:1.3s">23</span>
+                    </div>
+                    <div class="bd-row" style="--d:1.7s">
+                      <span class="bd-name">國語作業簿 第三課</span>
+                      <span class="chip" style="--d:2.2s">8</span><span class="chip" style="--d:2.35s">17</span>
+                    </div>
+                    <div class="bd-row" style="--d:2.9s">
+                      <span class="bd-name">聯絡簿簽名</span>
+                      <span class="chip" style="--d:3.4s">3</span>
+                    </div>
+                  </div>
+                  <div class="stand"></div>
+                </div>
+              </div>
+
+              <!-- 03 抽籤 -->
+              <div class="scene sc-lottery" data-scene="3">
+                <div class="stars"></div>
+                <div class="lt-info">
+                  <small>座號</small>
+                  <b>12</b>
+                  <div class="tickets"><span class="used">🎟️</span><span>🎟️</span></div>
+                  <small>抽籤券 × 2</small>
+                  <div class="lt-btn">抽！</div>
+                </div>
+                <div class="slot">
+                  <small>號碼</small>
+                  <div class="slot-win"><div class="slot-strip">
+                    <span>7</span><span>19</span><span>33</span><span>2</span><span>14</span><span>38</span>
+                    <span>25</span><span>11</span><span>30</span><span>6</span><span>21</span><span>27</span>
+                  </div></div>
+                </div>
+                <div class="flip">
+                  <div class="flip-inner">
+                    <div class="face back">✦</div>
+                    <div class="face front">
+                      <div class="f-icon">🎧</div>
+                      <b>我是DJ</b>
+                      <p>下課或用餐時間<br>可以點 1 首歌。</p>
+                    </div>
+                  </div>
+                  <div class="burst" id="burst"></div>
+                </div>
+              </div>
+
+              <!-- 04 卡片背包 -->
+              <div class="scene sc-bag" data-scene="4">
+                <h2 class="bag-title">🎒 座號 12 的卡片背包</h2>
+                <div class="bag">
+                  <div class="card pick" style="--dx:328px;--d:1.2s"><i>🎧</i><b>我是DJ</b></div>
+                  <div class="card pick" style="--dx:164px;--d:1.7s"><i>🧹</i><b>掃地Pass</b></div>
+                  <div class="card stay"><i>🔄</i><b>再抽一次</b></div>
+                  <div class="card pick" style="--dx:-164px;--d:2.2s"><i>📝</i><b>作業-1</b></div>
+                  <div class="card stay"><i>🏅</i><b>免死金牌</b></div>
+                </div>
+                <div class="bag-ok">🔑 導師碼確認</div>
+                <div class="bag-ticket"><span>🎟️</span><b>+1 抽籤券</b></div>
+              </div>
+
+              <!-- 05 全校共用 -->
+              <div class="scene sc-school" data-scene="5">
+                <svg class="links" viewBox="0 0 960 540">
+                  <line x1="480" y1="215" x2="190" y2="95"/>
+                  <line x1="480" y1="215" x2="770" y2="95"/>
+                  <line x1="480" y1="215" x2="190" y2="345"/>
+                  <line x1="480" y1="215" x2="770" y2="345"/>
+                </svg>
+                <div class="sheet">📊<b>一份試算表</b><small>全校共用</small></div>
+                <div class="cls" style="left:100px;top:50px;--d:.6s"><b>501 班</b><small>🔒 只看得到自己班</small></div>
+                <div class="cls" style="left:680px;top:50px;--d:.9s"><b>502 班</b><small>🔒 只看得到自己班</small></div>
+                <div class="cls" style="left:100px;top:300px;--d:1.2s"><b>601 班</b><small>🔒 只看得到自己班</small></div>
+                <div class="cls" style="left:680px;top:300px;--d:1.5s"><b>602 班</b><small>🔒 只看得到自己班</small></div>
+                <div class="pills">
+                  <span style="--d:3.2s">🛡️ 每支功能都驗證班級</span>
+                  <span style="--d:3.8s">🔐 代碼只存加鹽雜湊</span>
+                  <span style="--d:4.4s">🙈 學生只用班級＋座號</span>
+                </div>
+              </div>
+
+              <!-- 片尾 -->
+              <div class="scene sc-end" data-scene="6">
+                <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
+                <img class="t-logo" src="icons/icon-192.png" alt="" width="110" height="110">
+                <div class="e-line">讓每天的班級經營，輕鬆一點</div>
+                <div class="e-by">Created by 祐誠老師</div>
+              </div>
+
+              <div class="chapter-tag"></div>
+              <div class="caption"></div>
+            </div>
+
+            <button class="vp-poster" type="button">
+              <span class="play-ring">▶</span>
+              <span class="poster-text">播放介紹影片（約 1 分鐘）</span>
+            </button>
+          </div>
+
+          <div class="vp-bar">
+            <button class="vp-btn" type="button" data-act="toggle" aria-label="播放">▶</button>
+            <div class="vp-track" role="slider" aria-label="影片進度" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0" tabindex="0">
+              <div class="vp-fill"></div>
+              <div class="vp-marks"></div>
+            </div>
+            <span class="vp-time">0:00 / 1:00</span>
+            <button class="vp-btn" type="button" data-act="fullscreen" aria-label="全螢幕">⛶</button>
+          </div>
+          <div class="vp-chapters" aria-label="影片章節"></div>
+        </div>
+        <p class="caption-live visually-hidden" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- 功能 -->
+    <section id="features" class="sec">
+      <div class="wrap">
+        <p class="sec-kicker">FEATURES</p>
+        <h2 class="sec-title">五個頁面，各司其職</h2>
+        <p class="sec-lead">每一頁都可以直接從這裡打開。第一次使用時，系統會請你輸入「班級代號＋代碼」。</p>
+        <div class="feat-grid">
+          <article class="feat">
+            <div class="feat-icon">📝</div>
+            <h3>記錄缺交</h3>
+            <p>手機上點座號就記下缺交，紅色一眼看出誰還沒交。</p>
+            <ul>
+              <li>補交模式：點紅色座號改成「已補交」</li>
+              <li>一天可建立多項作業，隨時切換</li>
+              <li>可以加到手機主畫面，當 App 使用</li>
+            </ul>
+            <a class="feat-link" href="index.html">打開記錄頁 →</a>
+          </article>
+          <article class="feat">
+            <div class="feat-icon">📺</div>
+            <h3>投影看板</h3>
+            <p>教室電腦全螢幕投影，最多同時顯示 5 項作業的缺交座號。</p>
+            <ul>
+              <li>座號很多時字級自動縮小，全部看得到</li>
+              <li>投影順序在記錄頁用 ↑ ↓ 調整</li>
+              <li>教室電腦用班級碼登入，只能看不能改</li>
+            </ul>
+            <a class="feat-link" href="board.html">打開投影頁 →</a>
+          </article>
+          <article class="feat">
+            <div class="feat-icon">🎟️</div>
+            <h3>抽籤獎勵</h3>
+            <p>學生用抽籤券抽號碼，翻開卡片拿獎勵，有音樂與動畫特效。</p>
+            <ul>
+              <li>獎項名稱、圖示、說明、機率都能自訂</li>
+              <li>效果：無／再抽一次／自選卡片</li>
+              <li>畫面右側顯示最近 10 筆抽中紀錄</li>
+            </ul>
+            <a class="feat-link" href="lottery.html">打開抽籤頁 →</a>
+          </article>
+          <article class="feat">
+            <div class="feat-icon">🎒</div>
+            <h3>卡片背包</h3>
+            <p>抽到的卡片放進每位學生的背包，使用時再由老師確認。</p>
+            <ul>
+              <li>3 張未使用的卡可回收換 1 張抽籤券</li>
+              <li>回收需要導師碼，避免學生自行操作</li>
+              <li>按錯可以在設定頁復原</li>
+            </ul>
+            <a class="feat-link" href="lottery.html">在抽籤頁打開背包 →</a>
+          </article>
+          <article class="feat">
+            <div class="feat-icon">⚙️</div>
+            <h3>設定與管理</h3>
+            <p>導師登入班級、匯入名單、發抽籤券、管理卡片與紀錄。</p>
+            <ul>
+              <li>名單 CSV 只需要「班級代號,座號」</li>
+              <li>卡片可新增、編輯、停用、刪除</li>
+              <li>學期末一鍵清除已使用的卡片</li>
+            </ul>
+            <a class="feat-link" href="settings.html">打開設定頁 →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 使用流程 -->
+    <section id="flow" class="sec sec-alt">
+      <div class="wrap">
+        <p class="sec-kicker">HOW IT WORKS</p>
+        <h2 class="sec-title">從開班到學期末</h2>
+        <ol class="steps">
+          <li>
+            <b>管理者開班</b>
+            <p>由學校的系統管理者建立班級，設定該班的導師碼與班級碼，再交給導師。不開放自行註冊。</p>
+          </li>
+          <li>
+            <b>導師登入、匯入名單</b>
+            <p>在設定頁輸入「班級代號＋導師碼」，上傳只有座號的名單 CSV。</p>
+          </li>
+          <li>
+            <b>每天記錄缺交</b>
+            <p>用手機建立當天作業，點座號記錄；學生補交時切到補交模式。</p>
+          </li>
+          <li>
+            <b>教室投影與抽籤</b>
+            <p>教室電腦用「班級代號＋班級碼」登入，投影看板、讓學生用抽籤券抽卡。</p>
+          </li>
+          <li>
+            <b>學期末整理資料</b>
+            <p>匯出需要的紀錄後清除；畢業班於畢業後請管理者刪除整班資料。</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 身分與權限 -->
+    <section id="roles" class="sec">
+      <div class="wrap">
+        <p class="sec-kicker">ROLES</p>
+        <h2 class="sec-title">三種身分，各拿各的鑰匙</h2>
+        <div class="role-grid">
+          <article class="role">
+            <div class="role-head"><span>🛠️</span><h3>管理者</h3></div>
+            <p class="role-key">用「管理密碼」</p>
+            <ul>
+              <li>開班、停用或啟用班級</li>
+              <li>重設某班的導師碼、班級碼</li>
+              <li>刪除整班資料（需再確認一次）</li>
+            </ul>
+          </article>
+          <article class="role role-main">
+            <div class="role-head"><span>🧑‍🏫</span><h3>導師</h3></div>
+            <p class="role-key">用「班級代號＋導師碼」</p>
+            <ul>
+              <li>全部功能：記錄、名單、抽籤券</li>
+              <li>自訂卡片與機率</li>
+              <li>確認回收換券、復原紀錄</li>
+            </ul>
+          </article>
+          <article class="role">
+            <div class="role-head"><span>🖥️</span><h3>教室電腦</h3></div>
+            <p class="role-key">用「班級代號＋班級碼」</p>
+            <ul>
+              <li>投影看板</li>
+              <li>抽籤、查看卡片背包</li>
+              <li>不能修改名單與紀錄</li>
+            </ul>
+          </article>
+        </div>
+        <p class="note">💡 忘記代碼時，請找管理者重設。代碼請用 12 個字以上、不好猜的組合。</p>
+      </div>
+    </section>
+
+    <!-- 資安與個資 -->
+    <section id="safety" class="sec sec-dark">
+      <div class="wrap">
+        <p class="sec-kicker">PRIVACY &amp; SECURITY</p>
+        <h2 class="sec-title">保護學生資料，是設計的起點</h2>
+        <div class="safe-grid">
+          <div class="safe"><span>🙈</span><b>不存真實姓名</b><p>學生只用「班級代號＋座號」，例如 50101。</p></div>
+          <div class="safe"><span>🔐</span><b>代碼不存明碼</b><p>導師碼、班級碼只存加鹽雜湊，連管理者也看不到原本的代碼。</p></div>
+          <div class="safe"><span>🛡️</span><b>每班互相隔離</b><p>每一個功能都在後端再驗證一次班級，只能讀寫自己班的資料。</p></div>
+          <div class="safe"><span>⏳</span><b>防止亂猜代碼</b><p>10 分鐘內輸錯 10 次，會暫停驗證 10 分鐘。</p></div>
+        </div>
+        <p class="note note-dark">資料存放在 Google 試算表（國外雲端服務），屬於資料委外處理；正式啟用前，建議先向學校資安窗口報備。</p>
+      </div>
+    </section>
+
+    <!-- 安裝成 App -->
+    <section id="install" class="sec">
+      <div class="wrap">
+        <p class="sec-kicker">INSTALL</p>
+        <h2 class="sec-title">加到手機主畫面，像 App 一樣用</h2>
+        <div class="install-grid">
+          <div class="install"><b>Android（Chrome）</b><p>打開記錄頁 → 右上角「⋮」→「加到主畫面」。</p></div>
+          <div class="install"><b>iPhone／iPad（Safari）</b><p>打開記錄頁 → 下方「分享」→「加入主畫面」。</p></div>
+          <div class="install"><b>教室電腦</b><p>用瀏覽器打開投影頁或抽籤頁，按 F11 全螢幕即可。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 常見問題 -->
+    <section id="faq" class="sec sec-alt">
+      <div class="wrap wrap-narrow">
+        <p class="sec-kicker">FAQ</p>
+        <h2 class="sec-title">常見問題</h2>
+        <details class="faq">
+          <summary>需要安裝什麼軟體嗎？</summary>
+          <p>不用。用手機或電腦的瀏覽器打開網頁就能使用，也可以加到主畫面。</p>
+        </details>
+        <details class="faq">
+          <summary>導師碼和班級碼有什麼不同？</summary>
+          <p>導師碼可以使用全部功能，請自己保管；班級碼給教室電腦用，只能投影看板、抽籤和查看背包，不能修改資料。</p>
+        </details>
+        <details class="faq">
+          <summary>別班的老師看得到我們班的資料嗎？</summary>
+          <p>看不到。每個功能都會在後端確認班級代號與代碼，只能讀寫自己班的資料。</p>
+        </details>
+        <details class="faq">
+          <summary>抽籤的獎項可以自己改嗎？</summary>
+          <p>可以。在設定頁的卡片管理新增或編輯卡片，設定名稱、圖示、說明、機率與效果。改了設定不會影響學生已經抽到的卡。</p>
+        </details>
+        <details class="faq">
+          <summary>學生抽到「自選卡片」怎麼辦？</summary>
+          <p>可以從效果是「無」或「再抽一次」的卡片中挑一張，直接放進背包，不能再挑另一張自選卡片。</p>
+        </details>
+        <details class="faq">
+          <summary>資料會保存多久？</summary>
+          <p>建議學期末匯出需要的紀錄後清除；畢業班於畢業後，請管理者刪除該班資料。</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- 聯絡窗口 -->
+    <section id="contact" class="sec">
+      <div class="wrap contact">
+        <div class="contact-info">
+          <p class="sec-kicker">CONTACT</p>
+          <h2 class="sec-title">聯絡窗口</h2>
+          <p>想讓自己的班級也用這套系統，或使用時遇到問題，都可以留下聯絡方式，我們會盡快回覆您。</p>
+          <ul class="contact-list">
+            <li><span>🏫</span><div><b>申請開班</b><small>系統由管理者開班，不開放自行註冊</small></div></li>
+            <li><span>🛠️</span><div><b>使用問題</b><small>登入、忘記代碼、畫面異常都可以詢問</small></div></li>
+            <li><span>💬</span><div><b>建議回饋</b><small>想要的新功能或改善建議</small></div></li>
+          </ul>
+        </div>
+
+        <form id="contactForm" class="contact-card" novalidate>
+          <label class="cf-field">
+            <span>學校 <em>必填</em></span>
+            <input name="學校" type="text" maxlength="40" required autocomplete="organization" placeholder="例如：○○國小">
+          </label>
+          <label class="cf-field">
+            <span>姓名 <em>必填</em></span>
+            <input name="姓名" type="text" maxlength="20" required autocomplete="name" placeholder="方便我們稱呼您即可">
+          </label>
+          <label class="cf-field">
+            <span>聯絡方式 <em>必填</em></span>
+            <input name="聯絡方式" type="text" maxlength="80" required placeholder="學校公務 Email 或電話＋分機">
+          </label>
+          <label class="cf-field">
+            <span>詢問類型 <em>必填</em></span>
+            <select name="詢問類型" required>
+              <option value="">請選擇</option>
+              <option>申請開班</option>
+              <option>使用問題</option>
+              <option>建議回饋</option>
+              <option>其他</option>
+            </select>
+          </label>
+          <!-- 防機器人：真人看不到這一欄，有填就不送出 -->
+          <label class="cf-trap" aria-hidden="true">網站<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+
+          <p class="cf-privacy">🔒 蒐集目的：回覆您的詢問與聯繫開班事宜。資料只由系統管理者查看，處理完畢後於學期末刪除。請勿填寫學生資料。</p>
+          <button class="btn btn-primary cf-submit" type="submit">送出</button>
+          <p class="cf-msg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- 連結總覽 -->
+    <section class="sec cta">
+      <div class="wrap">
+        <h2 class="sec-title">準備好了嗎？</h2>
+        <p class="sec-lead">取得管理者給你的班級代號與導師碼，就可以開始使用。</p>
+        <div class="cta-links">
+          <a class="btn btn-primary" href="index.html">📝 記錄頁</a>
+          <a class="btn" href="board.html">📺 投影頁</a>
+          <a class="btn" href="lottery.html">🎟️ 抽籤頁</a>
+          <a class="btn" href="settings.html">⚙️ 設定頁</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <span><img src="icons/logo-96.png" alt="" width="22" height="22">班級管理 全校版</span>
+      <a href="https://github.com/star1123-cheng/class-management-school" rel="noopener">GitHub 原始碼</a>
+      <span>Created by 祐誠老師</span>
+    </div>
+  </footer>
+
+  <script src="config.js?v=10"></script>
+  <script src="js/intro.js?v=10"></script>
+  <script src="js/contact.js?v=10"></script>
+</body>
+</html>
