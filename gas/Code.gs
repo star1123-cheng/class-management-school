@@ -57,8 +57,6 @@ TEXT_COLUMNS[SHEET.DRAWS] = ['班級ID', '請求ID', '時間'];
 TEXT_COLUMNS[SHEET.BAG] = ['班級ID', '卡片ID', '卡名', '圖示', '說明', '取得時間', '使用時間', '連動ID'];
 
 var POOL_SIZE = 40;
-var PRIZE_NUMBERS = [7, 13, 20, 21, 34];
-var PRIZE_NAME = '小文具小玩具';
 var MAX_BOARD = 5;
 var MAX_CARDS = 50;
 var LOCK_WAIT_MS = 10000;
@@ -75,11 +73,23 @@ var FAIL_WINDOW_S = 600;
 var EFFECT_NONE = '無';
 var EFFECT_REDRAW = '再抽一次';   // 使用後自動送 1 張抽籤券
 var EFFECT_CHOOSE = '自選卡片';   // 使用時挑一張卡放進背包（取代舊版的「幸運女神」）
-var EFFECTS = [EFFECT_NONE, EFFECT_REDRAW, EFFECT_CHOOSE];
+var EFFECT_PRIZE = '實物';       // 實物獎品：抽到時用大獎畫面揭曉，「使用」就是記錄已領取，不能回收換券
+var EFFECTS = [EFFECT_NONE, EFFECT_REDRAW, EFFECT_CHOOSE, EFFECT_PRIZE];
 
 // 自選卡片可以挑的效果（導師決定沿用舊版）：可以挑「再抽一次」，不能挑「自選卡片」，避免無限循環。
+// 也不能挑「實物」（實物要老師準備獎品）。
 // 挑到的卡直接放進背包，不另外確認（「使用卡片」本來就只有導師碼能操作）。
 var CHOOSE_ALLOWED_EFFECTS = [EFFECT_NONE, EFFECT_REDRAW];
+
+// 實物放進卡片背包時「來源」寫「實物」；說明留空時用 PRIZE_DESCRIPTION
+var BAG_SOURCE_PRIZE = '實物';
+var PRIZE_NAME = '小文具小玩具';
+var PRIZE_DESCRIPTION = '實物獎品，請找老師領取。（不能回收換券）';
+// 舊版籤池 40 個號碼中有 5 個實物；既有班級升級時，實物卡的權重換算成相同機率
+var PRIZE_RATIO = 5 / 40;
+// 指令碼屬性：upgradePrizes() 的兩個步驟做過就記下時間，避免重複執行
+var PRIZE_CARDS_KEY = 'PRIZE_CARDS_ADDED';
+var PRIZE_BACKFILL_KEY = 'PRIZE_BACKFILLED';
 
 // 卡片圖示只能從這份清單挑選（存代號，前端用代號對照圖示）
 var ICONS = {
@@ -118,7 +128,8 @@ var DEFAULT_CARDS = [
   ['再抽一次', 'redo', '不滿意的卡可以再抽一次。（可當次或下次使用）', 1, EFFECT_REDRAW],
   ['野餐卡', 'picnic', '用餐時間可和好朋友一起吃飯。', 1, EFFECT_NONE],
   ['白日夢卡', 'cloud', '可以挑一本書閱讀，不用睡午覺。', 1, EFFECT_NONE],
-  ['榮譽之星', 'glow', '獲得學校的榮譽卡一張。', 1, EFFECT_NONE]
+  ['榮譽之星', 'glow', '獲得學校的榮譽卡一張。', 1, EFFECT_NONE],
+  [PRIZE_NAME, 'gift', PRIZE_DESCRIPTION, 2.4, EFFECT_PRIZE]
 ];
 
 /* ============================================================
@@ -147,6 +158,79 @@ function setup() {
   report.push(getPepper_(true) ? '已產生 HASH_PEPPER' : 'HASH_PEPPER 已存在，保留原值');
   console.log(report.join('\n'));
   return report.join('\n');
+}
+
+/**
+ * 實物改版升級（只需要執行一次，由管理者在 Apps Script 編輯器手動執行）。
+ * 2026-10-27 起實物改成卡片管理裡效果是「實物」的卡，抽到也會放進卡片背包。
+ * 1. 幫還沒有實物卡的班級補一張「小文具小玩具」，權重換算成和舊版籤池相同的機率（5/40）。
+ * 2. 補登以前抽到的實物：從「抽籤紀錄」找出類型為「實物」、背包裡還沒有的抽籤，一律補成未使用（未領取）。
+ * 兩個步驟各自記在指令碼屬性，再執行一次不會重複（避免老師刪掉的實物卡、學期末清掉的紀錄又被補回來）。
+ */
+function upgradePrizes() {
+  var props = PropertiesService.getScriptProperties();
+  var report = [];
+  withLock_(function () {
+    var cardsDone = props.getProperty(PRIZE_CARDS_KEY);
+    if (cardsDone) {
+      report.push('實物卡：已經在 ' + cardsDone + ' 補過，這次沒有變動。');
+    } else {
+      report.push('實物卡：已幫 ' + addPrizeCards_() + ' 個班級補上「' + PRIZE_NAME + '」。');
+      props.setProperty(PRIZE_CARDS_KEY, nowIso_());
+    }
+    var bagDone = props.getProperty(PRIZE_BACKFILL_KEY);
+    if (bagDone) {
+      report.push('補登背包：已經在 ' + bagDone + ' 補登過，這次沒有變動。');
+    } else {
+      report.push('補登背包：已補登 ' + backfillPrizes_() + ' 個以前抽到的實物（未領取）。');
+      props.setProperty(PRIZE_BACKFILL_KEY, nowIso_());
+    }
+  });
+  console.log(report.join('\n'));
+  return report.join('\n');
+}
+
+/** 每個還沒有實物卡的班級補一張實物卡；回傳補了幾個班 */
+function addPrizeCards_() {
+  var added = 0;
+  table_(SHEET.CLASSES).rows.forEach(function (r) {
+    var cid = String(r['班級ID']).trim();
+    if (!cid) return;
+    var t = table_(SHEET.CARDS, cid);
+    var cards = t.rows.map(cardItem_);
+    if (cards.length >= MAX_CARDS || cards.some(function (c) { return c.effect === EFFECT_PRIZE || c.name === PRIZE_NAME; })) return;
+    // 實物機率 = w / (原本總權重 + w) = PRIZE_RATIO
+    var total = cards.filter(isDrawable_).reduce(function (s, c) { return s + c.weight; }, 0);
+    var w = total > 0 ? Math.round(total * PRIZE_RATIO / (1 - PRIZE_RATIO) * 100) / 100 : 1;
+    w = Math.min(Math.max(w, 0.01), 100);
+    appendRows_(t, [{
+      '卡片ID': 'C' + newId_(), '卡名': PRIZE_NAME, '圖示': 'gift', '說明': PRIZE_DESCRIPTION,
+      '權重': w, '效果': EFFECT_PRIZE, '啟用': '是'
+    }]);
+    added++;
+  });
+  return added;
+}
+
+/** 「抽籤紀錄」中背包還沒有的實物補進背包（各班分開比對）；回傳補登筆數 */
+function backfillPrizes_() {
+  var have = {};
+  table_(SHEET.BAG).rows.forEach(function (r) { have[String(r['班級ID']).trim() + '|' + String(r['卡片ID'])] = true; });
+  var rows = [];
+  table_(SHEET.DRAWS).rows.forEach(function (r) {
+    var cid = String(r['班級ID']).trim();
+    var id = String(r['請求ID'] || '');
+    var seat = toInt_(r['座號']);
+    if (String(r['類型']).trim() !== '實物' || !cid || !id || seat === null || have[cid + '|' + id]) return;
+    have[cid + '|' + id] = true;
+    rows.push({
+      '班級ID': cid, '卡片ID': id, '座號': seat, '卡名': String(r['結果名稱'] || '') || PRIZE_NAME,
+      '圖示': String(r['圖示'] || '') || 'gift', '說明': PRIZE_DESCRIPTION, '效果': EFFECT_PRIZE,
+      '來源': BAG_SOURCE_PRIZE, '取得時間': String(r['時間']), '狀態': BAG_UNUSED
+    });
+  });
+  appendRows_(table_(SHEET.BAG), rows);
+  return rows.length;
 }
 
 /* ============================================================
@@ -355,10 +439,10 @@ function adminCreateClass_(req) {
       '鹽': salt, '啟用': '是', '建立時間': now
     }]);
 
+    // 每個號碼都依權重抽獎項（實物也是獎項之一），「類型」「實物名稱」欄只為了相容舊資料
     var poolRows = [];
     for (var n = 1; n <= POOL_SIZE; n++) {
-      var isPrize = PRIZE_NUMBERS.indexOf(n) !== -1;
-      poolRows.push({ '號碼': n, '類型': isPrize ? '實物' : '抽卡', '實物名稱': isPrize ? PRIZE_NAME : '', '已抽': '否' });
+      poolRows.push({ '號碼': n, '類型': '抽卡', '實物名稱': '', '已抽': '否' });
     }
     appendRows_(table_(SHEET.POOL, cid), poolRows);
 
@@ -818,23 +902,16 @@ function draw_(req) {
     var pick = undrawn[Math.floor(Math.random() * undrawn.length)];
     var number = toInt_(pick['號碼']);
 
-    // 4. 決定結果
-    var type, name, description, icon = '', effect = EFFECT_NONE;
-    if (String(pick['類型']).trim() === '實物') {
-      type = '實物';
-      name = String(pick['實物名稱'] || '').trim() || PRIZE_NAME;
-      description = '';
-    } else {
-      var card = pickCard_(cid);
-      if (!card) throw apiError_('NOT_FOUND');
-      type = '抽卡';
-      name = card.name;
-      description = card.description;
-      icon = card.icon;
-      effect = card.effect;
-    }
+    // 4. 依權重從啟用的獎項抽一個（籤池舊資料的「類型」欄不再使用）
+    var card = pickCard_(cid);
+    if (!card) throw apiError_('NOT_FOUND');
+    var prize = card.effect === EFFECT_PRIZE;
+    var type = prize ? '實物' : '抽卡';
+    var name = card.name;
+    var description = card.description || (prize ? PRIZE_DESCRIPTION : '');
+    var icon = card.icon;
 
-    // 5. 寫入籤池、抽籤券、抽籤紀錄；抽到卡片時同時放進卡片背包（卡名、說明、效果在這時候固定下來）
+    // 5. 寫入籤池、抽籤券、抽籤紀錄；抽到卡片或實物都放進卡片背包（卡名、說明、效果在這時候固定下來）
     var now = nowIso_();
     setFields_(poolTable, pick._row, { '已抽': '是', '抽出座號': seat, '抽出時間': now });
     appendRows_(table_(SHEET.TICKETS, cid), [{ '座號': seat, '異動': -1, '原因': '抽籤', '時間': now }]);
@@ -842,12 +919,10 @@ function draw_(req) {
       '請求ID': requestId, '時間': now, '座號': seat, '號碼': number,
       '類型': type, '結果名稱': name, '結果說明': description, '圖示': icon
     }]);
-    if (type === '抽卡') {
-      appendRows_(table_(SHEET.BAG, cid), [{
-        '卡片ID': requestId, '座號': seat, '卡名': name, '圖示': icon, '說明': description, '效果': effect,
-        '來源': '抽籤', '取得時間': now, '狀態': BAG_UNUSED
-      }]);
-    }
+    appendRows_(table_(SHEET.BAG, cid), [{
+      '卡片ID': requestId, '座號': seat, '卡名': name, '圖示': icon, '說明': description, '效果': card.effect,
+      '來源': prize ? BAG_SOURCE_PRIZE : '抽籤', '取得時間': now, '狀態': BAG_UNUSED
+    }]);
 
     // 6. 回傳
     return {
@@ -1094,7 +1169,7 @@ function undoUseCard_(req) {
 
 /**
  * 回收換券（只有導師碼可以呼叫）：同一位同學剛好 3 張未使用的卡，換 1 張抽籤券。
- * 卡名可以相同，但同一張卡（同一個卡片ID）不能重複算。
+ * 卡名可以相同，但同一張卡（同一個卡片ID）不能重複算；實物不能回收。
  * 3 張卡改成「已回收」並寫上同一個回收ID（放在連動ID 欄），復原時用它找回這 3 張。
  */
 function recycleCards_(req) {
@@ -1113,6 +1188,7 @@ function recycleCards_(req) {
       var row = find_(bag.rows, function (r) { return String(r['卡片ID']) === id; });
       if (!row) throw apiError_('NOT_FOUND');
       if (bagItem_(row).status !== BAG_UNUSED) throw apiError_('ALREADY_USED');
+      if (isPrizeBag_(bagItem_(row))) throw apiError_('NOT_RECYCLABLE');
       return row;
     });
     var seat = bagItem_(rows[0]).seat;
@@ -1211,6 +1287,11 @@ function bagOut_(c) {
     source: c.source, gotAt: c.gotAt, status: c.status, usedAt: c.usedAt,
     recycleId: c.status === BAG_RECYCLED ? c.linkId : ''
   };
+}
+
+/** 背包裡的實物：來源是「實物」（含補登的），或效果是「實物」 */
+function isPrizeBag_(c) {
+  return c.source === BAG_SOURCE_PRIZE || c.effect === EFFECT_PRIZE;
 }
 
 /** 各座號未使用的卡片張數 */

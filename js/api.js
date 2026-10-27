@@ -21,7 +21,7 @@
   function iconOf(key) { return ICONS.hasOwnProperty(key) ? ICONS[key] : ICONS.sparkle; }
 
   // 卡片效果（要和 gas/Code.gs 的 EFFECTS 一致）；自動效果一律看效果，不看卡名
-  var EFFECT = { NONE: '無', REDRAW: '再抽一次', CHOOSE: '自選卡片' };
+  var EFFECT = { NONE: '無', REDRAW: '再抽一次', CHOOSE: '自選卡片', PRIZE: '實物' };
 
   var ERROR_TEXT = {
     UNAUTHORIZED: '班級代號或存取碼錯誤，請重新輸入。',
@@ -39,6 +39,7 @@
     NO_TICKET: '這位同學沒有抽籤券了。',
     POOL_EMPTY: '籤池已全部抽完。',
     ALREADY_USED: '這張卡已經使用過了。',
+    NOT_RECYCLABLE: '實物獎品不能回收換券。',
     NOT_USED: '這張卡還沒有使用，不需要復原。',
     CANNOT_UNDO: '無法復原：這張卡送出的抽籤券或挑到的卡片已經用掉了。',
     CANCELLED: '已取消。',

@@ -499,6 +499,8 @@
   /* ============ 卡片背包 ============ */
   var EFFECT = App.EFFECT;
   var RECYCLED = '已回收';
+  var PRIZE = '實物';   // 和後端 BAG_SOURCE_PRIZE 一致
+  function isPrize(c) { return c.source === PRIZE || c.effect === EFFECT.PRIZE; }
 
   function loadBagData() {
     var seat = $('bagSeat').value;
@@ -539,11 +541,11 @@
     if (!unused.length) ub.appendChild(h('tr', {}, h('td', { colspan: '4', class: 'muted', text: '沒有未使用的卡片。' })));
     unused.forEach(function (c) {
       var cell = h('td', {});
-      cell.appendChild(h('button', { type: 'button', class: 'btn btn-small', text: '使用', onclick: function () { startUse(c, cell); } }));
+      cell.appendChild(h('button', { type: 'button', class: 'btn btn-small', text: isPrize(c) ? '領取' : '使用', onclick: function () { startUse(c, cell); } }));
       ub.appendChild(h('tr', {},
         h('td', { text: c.seat + ' 號' }),
         h('td', { title: c.description, text: c.name }),
-        h('td', { text: App.fmtMD(c.gotAt) + (c.source === EFFECT.CHOOSE ? '（自選）' : '') }),
+        h('td', { text: App.fmtMD(c.gotAt) + (c.source === EFFECT.CHOOSE ? '（自選）' : isPrize(c) ? '（實物）' : '') }),
         cell));
     });
 
@@ -555,7 +557,7 @@
       bb.appendChild(h('tr', {},
         h('td', { text: App.fmtMD(c.usedAt) + ' ' + App.fmtHM(c.usedAt) }),
         h('td', { text: c.seat + ' 號' }),
-        h('td', { text: c.name + (recycled ? '（已回收）' : '') }),
+        h('td', { text: c.name + (recycled ? '（已回收）' : isPrize(c) ? '（已領取）' : '') }),
         h('td', {}, h('button', { type: 'button', class: 'btn btn-small', text: '復原',
           onclick: function () { recycled ? undoRecycle(c, this) : undoUse(c, this); } }))));
     });
@@ -582,12 +584,13 @@
   async function useCard(card, choice, btn) {
     var msg = choice
       ? '要使用 ' + card.seat + ' 號的「' + card.name + '」，並把「' + choice.name + '」放進背包嗎？'
+      : isPrize(card) ? '要記錄 ' + card.seat + ' 號已領取「' + card.name + '」嗎？'
       : '要使用 ' + card.seat + ' 號的「' + card.name + '」嗎？' + (card.effect === EFFECT.REDRAW ? '\n（會自動送 1 張抽籤券）' : '');
     if (!confirm(msg)) return;
     if (btn) btn.disabled = true;
     try {
       var d = await App.api('useCard', { cardId: card.id, choiceId: choice ? choice.id : undefined });
-      var text = card.seat + ' 號已使用「' + card.name + '」';
+      var text = card.seat + ' 號已' + (isPrize(card) ? '領取' : '使用') + '「' + card.name + '」';
       if (d.granted) text += '，已送 1 張券（目前 ' + d.balance + ' 張）';
       if (d.chosen) text += '，「' + d.chosen.name + '」已放進背包';
       setStatus($('bagStatus'), text + '。', true);

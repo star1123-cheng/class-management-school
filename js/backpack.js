@@ -5,6 +5,7 @@
  * 自選卡片：使用前先從可以挑的卡片中選一張，挑到的卡放進同一位同學的背包。
  * 自動效果一律看卡片的「效果」欄位，不看卡名（老師可以自訂卡名）。
  * 回收換券：勾選 3 張未使用的卡（卡名可以相同）→ 換 1 張抽籤券（需要導師碼）。
+ * 實物也會放進背包，「使用」就是記錄已領取；實物不能回收換券。
  * 「復原」只在設定頁提供（導師專用）。
  */
 (function () {
@@ -15,6 +16,12 @@
   var EFFECT = App.EFFECT;
   var RECYCLED = '已回收';
   var RECYCLE_COUNT = 3;  // 和後端 RECYCLE_COUNT 一致
+  var PRIZE = '實物';     // 和後端 BAG_SOURCE_PRIZE 一致
+
+  // 和後端 isPrizeBag_ 一致：來源或效果是「實物」
+  function isPrize(card) { return card.source === PRIZE || card.effect === EFFECT.PRIZE; }
+  function canRecycleCard(card) { return card.status === '未使用' && !isPrize(card); }
+  function useLabel(card) { return isPrize(card) ? '領取這個獎品' : '使用這張卡'; }
 
   var hooks = null;   // 由 lottery.js 提供：getSeats、getSelected、getBagCounts、isIdle、onUsed、onRecycled、onChanged、sfx
   var st = { seat: null, cards: [], choices: [], counts: {}, busy: false, loadSeq: 0 };
@@ -100,11 +107,12 @@
     opts = opts || {};
     var recycled = card.status === RECYCLED;
     var used = card.status === '已使用' || recycled;
-    var mark = recycled ? '已回收' : '已使用';
+    var prize = isPrize(card);
+    var mark = recycled ? '已回收' : prize ? '已領取' : '已使用';
     var meta = opts.meta !== undefined ? opts.meta
-      : used ? App.fmtMD(card.usedAt) + (recycled ? ' 回收' : ' 使用')
+      : used ? App.fmtMD(card.usedAt) + (recycled ? ' 回收' : prize ? ' 領取' : ' 使用')
       : card.gotAt ? App.fmtMD(card.gotAt) + ' 取得' : '';
-    var from = !used && card.source === EFFECT.CHOOSE ? '🍀 自選' : '';
+    var from = used ? '' : card.source === EFFECT.CHOOSE ? '🍀 自選' : prize ? '🎁 實物' : '';
     return LotteryFx.cardEl(card, {
       tag: opts.onclick ? 'button' : 'div',
       topLeft: meta,
@@ -132,11 +140,11 @@
       body.appendChild(h('p', { class: 'bag-empty', text: '背包還是空的，抽到卡片後會自動放進來。' }));
       return;
     }
-    var canRecycle = unused.length >= RECYCLE_COUNT;
+    var canRecycle = unused.filter(canRecycleCard).length >= RECYCLE_COUNT;
     body.appendChild(h('div', { class: 'bag-actions' },
       h('button', { type: 'button', class: 'btn btn-recycle', disabled: !canRecycle, onclick: renderRecycle,
         text: '♻️ 回收 ' + RECYCLE_COUNT + ' 張換 1 張抽籤券' }),
-      canRecycle ? null : h('span', { class: 'bag-hint', text: '（未使用的卡滿 ' + RECYCLE_COUNT + ' 張才能回收）' })));
+      canRecycle ? null : h('span', { class: 'bag-hint', text: '（未使用的卡滿 ' + RECYCLE_COUNT + ' 張才能回收，實物不算）' })));
     // 已使用與已回收混在一起，依時間新到舊（後端已排好）
     var done = st.cards.filter(function (c) { return c.status !== '未使用'; });
     var grid = h('div', { class: 'bag-grid' });
@@ -150,8 +158,11 @@
     var body = $('bagBody');
     App.clear(body);
     var used = card.status !== '未使用';
+    var prize = isPrize(card);
     var hint = card.status === RECYCLED ? '這張卡在 ' + App.fmtMD(card.usedAt) + ' ' + App.fmtHM(card.usedAt) + ' 回收換券了。'
-      : used ? '這張卡在 ' + App.fmtMD(card.usedAt) + ' ' + App.fmtHM(card.usedAt) + ' 使用過了。'
+      : used && prize ? '這個獎品在 ' + App.fmtMD(card.usedAt) + ' ' + App.fmtHM(card.usedAt) + ' 領取了。'
+      : prize ? '老師把獎品交給 ' + card.seat + ' 號後，按「領取」記錄下來。實物不能回收換券。'
+      : used ?'這張卡在 ' + App.fmtMD(card.usedAt) + ' ' + App.fmtHM(card.usedAt) + ' 使用過了。'
       : card.effect === EFFECT.REDRAW ? '使用後會自動送 ' + card.seat + ' 號 1 張抽籤券。'
       : card.effect === EFFECT.CHOOSE ? '使用時可以從其他卡片中挑一張，放進 ' + card.seat + ' 號的背包。'
       : '使用後請老師現場執行卡片內容。';
@@ -161,7 +172,7 @@
       h('div', { class: 'bag-actions' },
         h('button', { type: 'button', class: 'btn', text: '← 回到背包', onclick: renderList }),
         used ? null : h('button', {
-          type: 'button', class: 'btn btn-use', text: card.effect === EFFECT.CHOOSE ? '使用：挑一張卡' : '使用這張卡',
+          type: 'button', class: 'btn btn-use', text: card.effect === EFFECT.CHOOSE ? '使用：挑一張卡' : useLabel(card),
           onclick: function () { card.effect === EFFECT.CHOOSE ? renderLucky(card) : useCard(card, null, this); }
         }))));
   }
@@ -212,12 +223,12 @@
     } catch (e) {
       st.busy = false;
       if (e.code === 'CANCELLED') {
-        if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice.name + '」' : '使用這張卡'; }
+        if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice.name + '」' : useLabel(card); }
         return;
       }
       App.toast(App.errorText(e), 'error');
       if (e.code === 'ALREADY_USED' || e.code === 'NOT_FOUND') { load(); return; }
-      if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice.name + '」' : '使用這張卡'; }
+      if (btn) { btn.disabled = false; btn.textContent = choice ? '確定選「' + choice.name + '」' : useLabel(card); }
     }
   }
 
@@ -233,7 +244,7 @@
       info.push(h('p', { class: 'bag-result' }, '🍀 已把「', h('strong', { text: d.chosen.name }), '」放進 ' + card.seat + ' 號的背包'));
       info.push(ticket(d.chosen, { cls: 'pop-in' }));
     }
-    if (!info.length) info.push(h('p', { class: 'bag-result', text: '請老師現場執行卡片內容。' }));
+    if (!info.length) info.push(h('p', { class: 'bag-result', text: isPrize(card) ? '🎁 已記錄 ' + card.seat + ' 號領取獎品。' : '請老師現場執行卡片內容。' }));
     body.appendChild(h('div', { class: 'bag-detail' }, t, info,
       h('div', { class: 'bag-actions' }, h('button', { type: 'button', class: 'btn btn-use', text: '回到背包', onclick: function () { load(); } }))));
     if (hooks.sfx) hooks.sfx(d.granted || d.chosen ? 'fanfare' : 'ding');
@@ -244,7 +255,7 @@
   function renderRecycle() {
     var body = $('bagBody');
     App.clear(body);
-    var unused = st.cards.filter(function (c) { return c.status === '未使用'; });
+    var unused = st.cards.filter(canRecycleCard);
     var picked = [];
     var counter = h('b', { text: '0' });
     var confirmBtn = h('button', { type: 'button', class: 'btn btn-use', text: '確定回收', disabled: true,

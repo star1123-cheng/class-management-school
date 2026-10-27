@@ -51,7 +51,7 @@ function onlyCard(call, predicate, changes) {
   return target;
 }
 
-/** 一直抽到抽中卡片為止（籤池有 5 個實物號碼），回傳抽籤結果 */
+/** 一直抽到抽中卡片為止（預設獎項含實物），回傳抽籤結果 */
 function drawCard(call, seat) {
   for (let i = 0; i < 40; i++) {
     call('grantTickets', { seat, amount: 1, reason: '發放' });
@@ -102,9 +102,11 @@ test('開班：檢查代碼規則、重複班級，試算表與回應都不含�
   [C501.teacher, C501.display, C502.teacher, C502.display, ADMIN].forEach((secret) => {
     assert.ok(!cells.some((v) => v.includes(secret)), '試算表不可以出現明碼：' + secret);
   });
-  // 每班有 40 個號碼、16 張卡片
+  // 每班有 40 個號碼、17 張卡片（含 1 張實物）；籤池不再固定哪幾號是實物
   assert.equal(api(g, C501)('getLottery').data.total, 40);
-  assert.equal(api(g, C502)('getCards').data.cards.length, 16);
+  assert.equal(api(g, C502)('getCards').data.cards.length, 17);
+  assert.equal(api(g, C502)('getCards').data.cards.filter((c) => c.effect === '實物').length, 1);
+  assert.ok(g.sheets['籤池'].dump().slice(1).every((line) => line[2] === '抽卡'));
 });
 
 test('班級驗證：導師碼、班級碼、跨班代碼、停用班級', () => {
@@ -223,8 +225,8 @@ test('卡片設定：欄位驗證、重複卡名、上限與機率', () => {
 
   const saved = t1('saveCard', base).data;
   assert.match(saved.id, /^C/);
-  assert.equal(t1('getCards').data.cards.length, 17);
-  assert.equal(t2('getCards').data.cards.length, 16);
+  assert.equal(t1('getCards').data.cards.length, 18);
+  assert.equal(t2('getCards').data.cards.length, 17);
   // 502 不能改 501 的卡
   assert.equal(t2('saveCard', Object.assign({}, base, { id: saved.id })).error, 'NOT_FOUND');
   assert.equal(t2('deleteCard', { id: saved.id }).error, 'NOT_FOUND');
@@ -233,10 +235,10 @@ test('卡片設定：欄位驗證、重複卡名、上限與機率', () => {
   const sum = t1('getCards').data.cards.reduce((s, c) => s + c.percent, 0);
   assert.ok(Math.abs(sum - 100) < 1, '機率加總 ' + sum);
   const info = t1('getCards').data;
-  assert.ok(info.icons.length > 10 && info.effects.length === 3);
+  assert.ok(info.icons.length > 10 && info.effects.length === 4);
 
   assert.equal(t1('deleteCard', { id: saved.id }).ok, true);
-  for (let i = 0; i < 34; i++) assert.equal(t1('saveCard', Object.assign({}, base, { name: '卡' + i })).ok, true);
+  for (let i = 0; i < 33; i++) assert.equal(t1('saveCard', Object.assign({}, base, { name: '卡' + i })).ok, true);
   assert.equal(t1('saveCard', Object.assign({}, base, { name: '第51張' })).error, 'TOO_MANY_CARDS');
 });
 
@@ -320,6 +322,86 @@ test('回收換券與清理：只動自己班', () => {
   assert.equal(t2('undoRecycle', { recycleId: rc2.recycleId }).error, 'NOT_FOUND');
   assert.equal(t2('clearUsedCards', { confirm: '清除' }).data.removed, 0);
   assert.equal(t1('clearUsedCards', { confirm: '清除' }).data.removed, 3);
+});
+
+test('實物：名稱權重可自訂，抽到放進背包，可以領取，不能回收也不能被自選', () => {
+  const { g, t1, t2 } = school();
+  // 實物卡改名、改說明，其他卡停用
+  onlyCard(t1, (c) => c.effect === '實物', { name: '貼紙', description: '' });
+  t1('grantTickets', { seat: 1, amount: 1, reason: '發放' });
+  const got = t1('draw', { seat: 1, requestId: 'req-prize-0001' }).data;
+  assert.equal(got.type, '實物');
+  assert.equal(got.name, '貼紙');
+  assert.equal(got.icon, 'gift');
+  // 說明留空時用預設說明
+  assert.match(got.description, /不能回收換券/);
+  assert.equal(t1('getLottery').data.bagCounts['1'], 1);
+  const prize = t1('getBackpack', { seat: 1 }).data.cards[0];
+  assert.equal(prize.id, 'req-prize-0001');
+  assert.equal(prize.source, '實物');
+  assert.equal(prize.effect, '實物');
+
+  // 自選卡片挑不到實物
+  const prizeCard = t1('getCards').data.cards.find((c) => c.effect === '實物');
+  t1('saveCard', Object.assign({}, prizeCard, { enabled: true }));
+  assert.ok(!t1('getBackpack', { seat: 1 }).data.choices.some((c) => c.effect === '實物' || c.id === prizeCard.id));
+
+  // 回收：含實物時回 NOT_RECYCLABLE，資料不變
+  onlyCard(t1, (c) => c.name === '導演');
+  drawCard(t1, 1);
+  drawCard(t1, 1);
+  const ids = t1('getBackpack', { seat: 1 }).data.cards.map((c) => c.id);
+  assert.equal(ids.length, 3);
+  const before = t1('getLottery').data.balances['1'];
+  assert.equal(t1('recycleCards', { cardIds: ids }).error, 'NOT_RECYCLABLE');
+  assert.equal(t1('getBackpack', { seat: 1 }).data.cards.filter((c) => c.status === '未使用').length, 3);
+  assert.equal(t1('getLottery').data.balances['1'], before);
+
+  // 領取：狀態改成已使用，不加券；可以復原
+  const used = t1('useCard', { cardId: prize.id }).data;
+  assert.equal(used.granted, 0);
+  assert.equal(used.chosen, null);
+  assert.equal(t1('getLottery').data.balances['1'], before);
+  assert.equal(t1('undoUseCard', { cardId: prize.id }).ok, true);
+  // 502 看不到也領不到 501 的實物
+  assert.equal(t2('useCard', { cardId: prize.id }).error, 'NOT_FOUND');
+  assert.ok(!g.sheets['卡片背包'].dump().slice(1).some((line) => line[0] === '502'));
+});
+
+test('upgradePrizes：補實物卡、補登以前的實物；各班分開，不重複執行', () => {
+  const { g, t1, t2 } = school();
+  // 模擬改版前的班級：沒有實物卡，「抽籤紀錄」裡有舊的實物
+  [t1, t2].forEach((call) => {
+    const prize = call('getCards').data.cards.find((c) => c.effect === '實物');
+    assert.equal(call('deleteCard', { id: prize.id }).ok, true);
+  });
+  const draws = g.sheets['抽籤紀錄'];
+  draws.rows.push(['501', 'old-prize-01', '2026-10-01T01:00:00.000Z', 2, 7, '實物', '小文具小玩具', '', '']);
+  draws.rows.push(['502', 'old-prize-01', '2026-10-02T01:00:00.000Z', 4, 13, '實物', '小文具小玩具', '', '']);
+  draws.rows.push(['501', 'old-card-01', '2026-10-03T01:00:00.000Z', 3, 8, '抽卡', '導演', '', 'clapper']);
+
+  const msg = g.ctx.upgradePrizes();
+  assert.match(msg, /2 個班級/);
+  assert.match(msg, /補登 2 個/);
+  [t1, t2].forEach((call) => {
+    const cards = call('getCards').data.cards;
+    const prize = cards.find((c) => c.effect === '實物');
+    assert.equal(prize.name, '小文具小玩具');
+    // 機率換算成和舊版相同的 5/40 = 12.5%
+    assert.ok(Math.abs(prize.percent - 12.5) < 0.2, '實物機率 ' + prize.percent);
+  });
+  // 同一個請求ID 在兩班各自補登，只補到自己班
+  const b1 = t1('getBackpack').data.cards;
+  const b2 = t2('getBackpack').data.cards;
+  assert.deepEqual(b1.map((c) => [c.id, c.seat, c.source, c.status]), [['old-prize-01', 2, '實物', '未使用']]);
+  assert.deepEqual(b2.map((c) => [c.id, c.seat, c.source, c.status]), [['old-prize-01', 4, '實物', '未使用']]);
+
+  // 再執行一次：沒有變動；老師刪掉的實物卡也不會被補回來
+  const again = t1('getCards').data.cards.find((c) => c.effect === '實物');
+  t1('deleteCard', { id: again.id });
+  assert.match(g.ctx.upgradePrizes(), /這次沒有變動[\s\S]*這次沒有變動/);
+  assert.equal(t1('getCards').data.cards.filter((c) => c.effect === '實物').length, 0);
+  assert.equal(t1('getBackpack').data.cards.length, 1);
 });
 
 test('管理者：重設代碼', () => {

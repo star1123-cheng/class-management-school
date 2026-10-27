@@ -247,16 +247,18 @@
       LotteryFx.revealPrize(stage, r, { reduced: reducedMQ.matches });
       Sfx.fanfare();
       if (!reducedMQ.matches) LotteryFx.confetti($('confetti'), T.confetti);
+      stage.appendChild(h('p', { class: 'bag-note', text: '🎒 已放進 ' + r.seat + ' 號的卡片背包' }));
     } else {
       var flipMs = instant ? 0 : T.flip;
       LotteryFx.revealCard(stage, r, { flipMs: flipMs });
       Sfx.flip();
       setTimeout(function () { Sfx.ding(); }, flipMs * 0.6);
       stage.appendChild(h('p', { class: 'bag-note', style: '--delay:' + flipMs + 'ms', text: '🎒 已放進 ' + r.seat + ' 號的卡片背包' }));
-      if (!r.replay) {
-        data.bagCounts = data.bagCounts || {};
-        data.bagCounts[r.seat] = (data.bagCounts[r.seat] || 0) + 1;
-      }
+    }
+    // 抽到卡片或實物都會放進背包
+    if (!r.replay) {
+      data.bagCounts = data.bagCounts || {};
+      data.bagCounts[r.seat] = (data.bagCounts[r.seat] || 0) + 1;
     }
 
     // 先在本機更新畫面資料，按「下一位」後再向後端同步

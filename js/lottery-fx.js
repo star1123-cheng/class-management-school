@@ -203,7 +203,7 @@
   var ICON_HUE = {
     headphones: 285, clapper: 355, handshake: 205, moneybag: 42, cool: 160, notebook: 25,
     medal: 50, teacher: 180, broom: 95, clover: 325, memo: 220, gem: 265,
-    redo: 190, picnic: 120, cloud: 240, glow: 35
+    redo: 190, picnic: 120, cloud: 240, glow: 35, gift: 15
   };
   function cardArt(card) {
     var key = card.icon || '';
