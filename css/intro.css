@@ -33,6 +33,7 @@ body {
 }
 a { color: var(--primary-dark); }
 img { display: inline-block; }
+[hidden] { display: none !important; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
